@@ -1,0 +1,427 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FCE77AAF1A132DF000E9763D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AAE1A132DF000E9763D /* main.m */; };
+		FCE77AB21A132DF000E9763D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AB11A132DF000E9763D /* AppDelegate.m */; };
+		FCE77AB51A132DF000E9763D /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AB41A132DF000E9763D /* ViewController.m */; };
+		FCE77AB81A132DF000E9763D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FCE77AB61A132DF000E9763D /* Main.storyboard */; };
+		FCE77ABA1A132DF000E9763D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FCE77AB91A132DF000E9763D /* Images.xcassets */; };
+		FCE77ABD1A132DF000E9763D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = FCE77ABB1A132DF000E9763D /* LaunchScreen.xib */; };
+		FCE77AC91A132DF000E9763D /* Bike_PartyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AC81A132DF000E9763D /* Bike_PartyTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FCE77AC31A132DF000E9763D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FCE77AA11A132DF000E9763D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FCE77AA81A132DF000E9763D;
+			remoteInfo = "Bike Party";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		FCE77AA91A132DF000E9763D /* Bike Party.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bike Party.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCE77AAD1A132DF000E9763D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FCE77AAE1A132DF000E9763D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		FCE77AB01A132DF000E9763D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		FCE77AB11A132DF000E9763D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		FCE77AB31A132DF000E9763D /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		FCE77AB41A132DF000E9763D /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		FCE77AB71A132DF000E9763D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		FCE77AB91A132DF000E9763D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		FCE77ABC1A132DF000E9763D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		FCE77AC21A132DF000E9763D /* Bike PartyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bike PartyTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCE77AC71A132DF000E9763D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FCE77AC81A132DF000E9763D /* Bike_PartyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Bike_PartyTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FCE77AA61A132DF000E9763D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCE77ABF1A132DF000E9763D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FCE77AA01A132DF000E9763D = {
+			isa = PBXGroup;
+			children = (
+				FCE77AAB1A132DF000E9763D /* Bike Party */,
+				FCE77AC51A132DF000E9763D /* Bike PartyTests */,
+				FCE77AAA1A132DF000E9763D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FCE77AAA1A132DF000E9763D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FCE77AA91A132DF000E9763D /* Bike Party.app */,
+				FCE77AC21A132DF000E9763D /* Bike PartyTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FCE77AAB1A132DF000E9763D /* Bike Party */ = {
+			isa = PBXGroup;
+			children = (
+				FCE77AB01A132DF000E9763D /* AppDelegate.h */,
+				FCE77AB11A132DF000E9763D /* AppDelegate.m */,
+				FCE77AB31A132DF000E9763D /* ViewController.h */,
+				FCE77AB41A132DF000E9763D /* ViewController.m */,
+				FCE77AB61A132DF000E9763D /* Main.storyboard */,
+				FCE77AB91A132DF000E9763D /* Images.xcassets */,
+				FCE77ABB1A132DF000E9763D /* LaunchScreen.xib */,
+				FCE77AAC1A132DF000E9763D /* Supporting Files */,
+			);
+			path = "Bike Party";
+			sourceTree = "<group>";
+		};
+		FCE77AAC1A132DF000E9763D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				FCE77AAD1A132DF000E9763D /* Info.plist */,
+				FCE77AAE1A132DF000E9763D /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FCE77AC51A132DF000E9763D /* Bike PartyTests */ = {
+			isa = PBXGroup;
+			children = (
+				FCE77AC81A132DF000E9763D /* Bike_PartyTests.m */,
+				FCE77AC61A132DF000E9763D /* Supporting Files */,
+			);
+			path = "Bike PartyTests";
+			sourceTree = "<group>";
+		};
+		FCE77AC61A132DF000E9763D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				FCE77AC71A132DF000E9763D /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FCE77AA81A132DF000E9763D /* Bike Party */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCE77ACC1A132DF000E9763D /* Build configuration list for PBXNativeTarget "Bike Party" */;
+			buildPhases = (
+				FCE77AA51A132DF000E9763D /* Sources */,
+				FCE77AA61A132DF000E9763D /* Frameworks */,
+				FCE77AA71A132DF000E9763D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Bike Party";
+			productName = "Bike Party";
+			productReference = FCE77AA91A132DF000E9763D /* Bike Party.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FCE77AC11A132DF000E9763D /* Bike PartyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCE77ACF1A132DF000E9763D /* Build configuration list for PBXNativeTarget "Bike PartyTests" */;
+			buildPhases = (
+				FCE77ABE1A132DF000E9763D /* Sources */,
+				FCE77ABF1A132DF000E9763D /* Frameworks */,
+				FCE77AC01A132DF000E9763D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FCE77AC41A132DF000E9763D /* PBXTargetDependency */,
+			);
+			name = "Bike PartyTests";
+			productName = "Bike PartyTests";
+			productReference = FCE77AC21A132DF000E9763D /* Bike PartyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FCE77AA11A132DF000E9763D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = Modeo;
+				TargetAttributes = {
+					FCE77AA81A132DF000E9763D = {
+						CreatedOnToolsVersion = 6.1;
+					};
+					FCE77AC11A132DF000E9763D = {
+						CreatedOnToolsVersion = 6.1;
+						TestTargetID = FCE77AA81A132DF000E9763D;
+					};
+				};
+			};
+			buildConfigurationList = FCE77AA41A132DF000E9763D /* Build configuration list for PBXProject "Bike Party" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FCE77AA01A132DF000E9763D;
+			productRefGroup = FCE77AAA1A132DF000E9763D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FCE77AA81A132DF000E9763D /* Bike Party */,
+				FCE77AC11A132DF000E9763D /* Bike PartyTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FCE77AA71A132DF000E9763D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCE77AB81A132DF000E9763D /* Main.storyboard in Resources */,
+				FCE77ABD1A132DF000E9763D /* LaunchScreen.xib in Resources */,
+				FCE77ABA1A132DF000E9763D /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCE77AC01A132DF000E9763D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FCE77AA51A132DF000E9763D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCE77AB51A132DF000E9763D /* ViewController.m in Sources */,
+				FCE77AB21A132DF000E9763D /* AppDelegate.m in Sources */,
+				FCE77AAF1A132DF000E9763D /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCE77ABE1A132DF000E9763D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCE77AC91A132DF000E9763D /* Bike_PartyTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FCE77AC41A132DF000E9763D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FCE77AA81A132DF000E9763D /* Bike Party */;
+			targetProxy = FCE77AC31A132DF000E9763D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		FCE77AB61A132DF000E9763D /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FCE77AB71A132DF000E9763D /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		FCE77ABB1A132DF000E9763D /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FCE77ABC1A132DF000E9763D /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		FCE77ACA1A132DF000E9763D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		FCE77ACB1A132DF000E9763D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FCE77ACD1A132DF000E9763D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = "Bike Party/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		FCE77ACE1A132DF000E9763D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = "Bike Party/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		FCE77AD01A132DF000E9763D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "Bike PartyTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bike Party.app/Bike Party";
+			};
+			name = Debug;
+		};
+		FCE77AD11A132DF000E9763D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "Bike PartyTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bike Party.app/Bike Party";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FCE77AA41A132DF000E9763D /* Build configuration list for PBXProject "Bike Party" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCE77ACA1A132DF000E9763D /* Debug */,
+				FCE77ACB1A132DF000E9763D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FCE77ACC1A132DF000E9763D /* Build configuration list for PBXNativeTarget "Bike Party" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCE77ACD1A132DF000E9763D /* Debug */,
+				FCE77ACE1A132DF000E9763D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		FCE77ACF1A132DF000E9763D /* Build configuration list for PBXNativeTarget "Bike PartyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCE77AD01A132DF000E9763D /* Debug */,
+				FCE77AD11A132DF000E9763D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FCE77AA11A132DF000E9763D /* Project object */;
+}
