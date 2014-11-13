@@ -29,7 +29,7 @@
     
     if (self.apiKey && ![name isEqualToString:@""] && radius > 0 && location) {
         
-        NSString *urlFormat = @"https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&key=%@&location=%f,%f&radius=%f&name=%@";
+        NSString *urlFormat = @"https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&key=%@&location=%f,%f&radius=%f&keyword=%@";
         
         NSString *urlString = [NSString stringWithFormat:urlFormat, self.apiKey, location.coordinate.latitude, location.coordinate.longitude, radius, name];
         
