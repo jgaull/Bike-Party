@@ -15,5 +15,6 @@
 
 - (id)initWithAPIKey:(NSString *)apiKey;
 - (void)loadDirectionsFromPlace:(GooglePlace *)origin toPlace:(GooglePlace *)destination WithCallback:(void (^)(NSArray *places, NSError *error))callback;
+- (void)loadDirectionsForPath:(NSArray *)path WithCallback:(void (^)(NSArray *places, NSError *error))callback;
 
 @end

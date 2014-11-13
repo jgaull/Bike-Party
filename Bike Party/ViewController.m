@@ -99,10 +99,8 @@
 - (void)refreshDirections {
     
     __weak typeof(self) weakSelf = self;
-    GooglePlace *origin = self.destinations.firstObject;
-    GooglePlace *destination = self.destinations.lastObject;
     GoogleDirectionsRequest *directionsRequest = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
-    [directionsRequest loadDirectionsFromPlace:origin toPlace:destination WithCallback:^(NSArray *routes, NSError *error) {
+    [directionsRequest loadDirectionsForPath:self.destinations WithCallback:^(NSArray *routes, NSError *error) {
         if (!error) {
             GoogleDirectionsRoute *route = routes.firstObject;
             [weakSelf performSelectorOnMainThread:@selector(drawMapWithRoute:) withObject:route waitUntilDone:NO];

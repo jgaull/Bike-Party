@@ -26,6 +26,41 @@
     return self;
 }
 
+- (void)loadDirectionsForPath:(NSArray *)path WithCallback:(void (^)(NSArray *places, NSError *error))callback {
+    if (self.apiKey && path.count > 1 && path.count <= 8) {
+        
+        NSString *baseUrl = @"https://maps.googleapis.com/maps/api/directions/json?key=%@&origin=%f,%f&destination=%f,%f&mode=bicycling";
+        
+        if (path.count > 2) {
+            NSString *waypointsString = @"&waypoints=";
+            for (int i = 1; i < path.count - 1; i++) {
+                GooglePlace *waypoint = [path objectAtIndex:i];
+                CLLocationCoordinate2D coordinate = waypoint.location.coordinate;
+                NSString *waypointString = [NSString stringWithFormat:@"%f,%f|", coordinate.latitude, coordinate.longitude];
+                waypointsString = [waypointsString stringByAppendingString:waypointString];
+            }
+            
+            waypointsString = [waypointsString substringToIndex:waypointsString.length - 1];
+            baseUrl = [baseUrl stringByAppendingString:waypointsString];
+            NSLog(@"%@", baseUrl);
+        }
+        
+        GooglePlace *origin = path.firstObject;
+        GooglePlace *destination = path.lastObject;
+        
+        CLLocationCoordinate2D originCoordinate = origin.location.coordinate;
+        CLLocationCoordinate2D destinationCoordinate = destination.location.coordinate;
+        NSString *urlString = [NSString stringWithFormat:baseUrl,
+                               self.apiKey,
+                               originCoordinate.latitude,
+                               originCoordinate.longitude,
+                               destinationCoordinate.latitude,
+                               destinationCoordinate.longitude];
+        
+        [self loadDirectionsWithUrlString:urlString withCallback:callback];
+    }
+}
+
 - (void)loadDirectionsFromPlace:(GooglePlace *)origin toPlace:(GooglePlace *)destination WithCallback:(void (^)(NSArray *places, NSError *error))callback {
     
     if (self.apiKey) {
@@ -77,6 +112,41 @@
     else {
         NSLog(@"Not enough params...");
     }
+}
+
+- (void)loadDirectionsWithUrlString:(NSString *)urlString withCallback:(void (^)(NSArray *places, NSError *error))callback {
+    NSMutableURLRequest *urlRequest = [self urlRequestForHTTPMethod:@"GET" withURLString:urlString];
+    
+    NSURLSessionDataTask *dataTask = [self.urlSession dataTaskWithRequest:urlRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (!error) {
+            NSError *error;
+            NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+            
+            if ([responseDictionary[@"status"] isEqualToString:@"OK"]) {
+                //NSLog(@"Success: %@", responseDictionary);
+                
+                NSArray *results = responseDictionary[@"routes"];
+                NSMutableArray *routes = [NSMutableArray new];
+                
+                for (NSDictionary *routeDictionary in results) {
+                    GoogleDirectionsRoute *route = [[GoogleDirectionsRoute alloc] initWithDictionary:routeDictionary];
+                    [routes addObject:route];
+                }
+                
+                callback(routes, nil);
+            }
+            else {
+                //NSLog(@"Error JSON decoding: %@", error.localizedDescription);
+                callback(nil, error);
+            }
+        }
+        else {
+            //NSLog(@"Error loading request: %@", error.localizedDescription);
+            callback(nil, error);
+        }
+    }];
+    
+    [dataTask resume];
 }
 
 - (NSMutableURLRequest *)urlRequestForHTTPMethod:(NSString *)method withURLString:(NSString *)urlString {
