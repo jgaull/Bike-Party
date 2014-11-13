@@ -11,7 +11,6 @@
 @interface AddDestinationViewController ()
 
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *cancelButton;
-@property (weak, nonatomic) IBOutlet UIBarButtonItem *doneButton;
 @property (weak, nonatomic) IBOutlet UITextField *searchTextField;
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 

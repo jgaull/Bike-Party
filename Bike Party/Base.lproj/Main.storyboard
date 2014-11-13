@@ -37,15 +37,14 @@
                                             </connections>
                                         </barButtonItem>
                                         <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search" minimumFontSize="17" clearButtonMode="always" id="fj1-Z5-pV8">
-                                            <rect key="frame" x="83" y="7" width="434" height="30"/>
+                                            <rect key="frame" x="76" y="7" width="508" height="30"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                            <textInputTraits key="textInputTraits" autocapitalizationType="words" returnKeyType="done"/>
+                                            <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" returnKeyType="done"/>
                                             <connections>
                                                 <outlet property="delegate" destination="d5R-PP-HPV" id="MHy-bN-3mV"/>
                                             </connections>
                                         </textField>
-                                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="6BO-ib-PMM"/>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
@@ -63,14 +62,13 @@
                     </view>
                     <connections>
                         <outlet property="cancelButton" destination="9Ed-aW-GkW" id="hWY-8I-M71"/>
-                        <outlet property="doneButton" destination="6BO-ib-PMM" id="lRS-mG-KZz"/>
                         <outlet property="mapView" destination="EXN-oT-Txy" id="TfA-cY-Rnz"/>
                         <outlet property="searchTextField" destination="fj1-Z5-pV8" id="CmZ-0t-EaM"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0rf-2n-uWV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1267" y="541"/>
+            <point key="canvasLocation" x="1273" y="548"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="ufC-wZ-h7g">
