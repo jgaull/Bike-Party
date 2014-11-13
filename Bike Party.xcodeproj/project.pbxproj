@@ -26,6 +26,7 @@
 		FCE77B0D1A14614000E9763D /* GoogleDirectionsLeg.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B0C1A14614000E9763D /* GoogleDirectionsLeg.m */; };
 		FCE77B101A14685500E9763D /* GoogleDirectionsStep.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B0F1A14685500E9763D /* GoogleDirectionsStep.m */; };
 		FCE77B191A1468CF00E9763D /* CLLocation+GoogleDirections.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B181A1468CF00E9763D /* CLLocation+GoogleDirections.m */; };
+		FCE77B1C1A14727A00E9763D /* MKPolyline+GoogleDirections.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B1B1A14727A00E9763D /* MKPolyline+GoogleDirections.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,8 @@
 		FCE77B0F1A14685500E9763D /* GoogleDirectionsStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GoogleDirectionsStep.m; sourceTree = "<group>"; };
 		FCE77B171A1468CF00E9763D /* CLLocation+GoogleDirections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLLocation+GoogleDirections.h"; sourceTree = "<group>"; };
 		FCE77B181A1468CF00E9763D /* CLLocation+GoogleDirections.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLLocation+GoogleDirections.m"; sourceTree = "<group>"; };
+		FCE77B1A1A14727A00E9763D /* MKPolyline+GoogleDirections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MKPolyline+GoogleDirections.h"; sourceTree = "<group>"; };
+		FCE77B1B1A14727A00E9763D /* MKPolyline+GoogleDirections.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MKPolyline+GoogleDirections.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +192,8 @@
 				FCE77B0F1A14685500E9763D /* GoogleDirectionsStep.m */,
 				FCE77B171A1468CF00E9763D /* CLLocation+GoogleDirections.h */,
 				FCE77B181A1468CF00E9763D /* CLLocation+GoogleDirections.m */,
+				FCE77B1A1A14727A00E9763D /* MKPolyline+GoogleDirections.h */,
+				FCE77B1B1A14727A00E9763D /* MKPolyline+GoogleDirections.m */,
 			);
 			name = "Google Directions";
 			sourceTree = "<group>";
@@ -308,6 +313,7 @@
 				FCE77B001A1421B800E9763D /* DestinationAnnotation.m in Sources */,
 				FCE77B0D1A14614000E9763D /* GoogleDirectionsLeg.m in Sources */,
 				FCE77AF51A13FE8C00E9763D /* GooglePlacesSearch.m in Sources */,
+				FCE77B1C1A14727A00E9763D /* MKPolyline+GoogleDirections.m in Sources */,
 				FCE77B071A1448D000E9763D /* GoogleDirectionsRequest.m in Sources */,
 				FCE77B0A1A14509800E9763D /* GoogleDirectionsRoute.m in Sources */,
 				FCE77AAF1A132DF000E9763D /* main.m in Sources */,

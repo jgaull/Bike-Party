@@ -73,6 +73,7 @@
     annotation.subtitle = destination.address;
     [self.mapView addAnnotation:annotation];
     
+    /*
     NSInteger numberOfSteps = self.destinations.count;
     
     CLLocationCoordinate2D coordinates[numberOfSteps];
@@ -88,6 +89,7 @@
     [self.mapView removeOverlay:self.routePolyline];
     self.routePolyline = polyLine;
     [self.mapView addOverlay:polyLine];
+     */
     
     if (self.destinations.count > 1) {
         [self refreshDirections];
@@ -95,22 +97,38 @@
 }
 
 - (void)refreshDirections {
+    
+    __weak typeof(self) weakSelf = self;
     GooglePlace *origin = self.destinations.firstObject;
     GooglePlace *destination = self.destinations.lastObject;
     GoogleDirectionsRequest *directionsRequest = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
     [directionsRequest loadDirectionsFromPlace:origin toPlace:destination WithCallback:^(NSArray *routes, NSError *error) {
         if (!error) {
             GoogleDirectionsRoute *route = routes.firstObject;
-            MKCoordinateSpan span = route.bounds.span;
-            MKCoordinateSpan paddedSpan = MKCoordinateSpanMake(span.latitudeDelta + EDGE_PAD, span.longitudeDelta + EDGE_PAD);
-            MKCoordinateRegion paddedRegion = MKCoordinateRegionMake(route.bounds.center, paddedSpan);
-            
-            [self.mapView setRegion:paddedRegion animated:YES];
+            [weakSelf performSelectorOnMainThread:@selector(drawMapWithRoute:) withObject:route waitUntilDone:NO];
         }
         else {
             NSLog(@"Flail: %@", error.localizedDescription);
         }
     }];
+}
+
+- (void)drawMapWithRoute:(GoogleDirectionsRoute *)route {
+    
+    MKPolyline *polyLine = route.overviewPolyline;
+    [self.mapView removeOverlay:self.routePolyline];
+    self.routePolyline = polyLine;
+    //[weakSelf.mapView addOverlay:polyLine];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.mapView addOverlay:polyLine];
+    });
+    
+    MKCoordinateSpan span = route.bounds.span;
+    MKCoordinateSpan paddedSpan = MKCoordinateSpanMake(span.latitudeDelta + EDGE_PAD, span.longitudeDelta + EDGE_PAD);
+    MKCoordinateRegion paddedRegion = MKCoordinateRegionMake(route.bounds.center, paddedSpan);
+    
+    [self.mapView setRegion:paddedRegion animated:YES];
 }
 
 /*
@@ -183,7 +201,7 @@
     
     MKPolylineRenderer *polylineRenderer = [[MKPolylineRenderer alloc] initWithPolyline:overlay];
     polylineRenderer.strokeColor = [UIColor redColor];
-    polylineRenderer.lineWidth = 5.0;
+    polylineRenderer.lineWidth = 3.0;
     
     return polylineRenderer;
 }

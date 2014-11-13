@@ -8,6 +8,7 @@
 
 #import "GoogleDirectionsRoute.h"
 #import "GoogleDirectionsLeg.h"
+#import "MKPolyline+GoogleDirections.h"
 
 @implementation GoogleDirectionsRoute
 
@@ -43,8 +44,7 @@
         
         _legs = [[NSArray alloc] initWithArray:legs];
         
-        _overviewPolyline = dictionary[@"overview_polyline"][@"points"];
-        
+        _overviewPolyline = [MKPolyline polylineWithEncodedString:dictionary[@"overview_polyline"][@"points"]];
         _copyright = dictionary[@"copyrights"];
         _summary = dictionary[@"summary"];
         _warnings = dictionary[@"warnings"];

@@ -17,7 +17,7 @@
 @property (nonatomic, readonly) MKCoordinateRegion bounds;
 @property (nonatomic, readonly) NSString *copyright;
 @property (nonatomic, readonly) NSArray *legs;
-@property (nonatomic, readonly) NSString *overviewPolyline;
+@property (nonatomic, readonly) MKPolyline *overviewPolyline;
 @property (nonatomic, readonly) NSString *summary;
 @property (nonatomic, readonly) NSArray *warnings;
 @property (nonatomic, readonly) NSArray *waypointOrder;
