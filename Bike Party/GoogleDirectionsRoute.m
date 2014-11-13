@@ -7,6 +7,7 @@
 //
 
 #import "GoogleDirectionsRoute.h"
+#import "GoogleDirectionsLeg.h"
 
 @implementation GoogleDirectionsRoute
 
@@ -30,7 +31,17 @@
         
         _bounds = MKCoordinateRegionMake(center, span);
         
-        _legs = dictionary[@"legs"]; //more to come here.
+        
+        NSArray *legDictionaries = dictionary[@"legs"];
+        NSMutableArray *legs = [NSMutableArray new];
+        for (NSDictionary *legDictionary in legDictionaries) {
+            
+            GoogleDirectionsLeg *leg = [[GoogleDirectionsLeg alloc] initWithDictionary:legDictionary];
+            [legs addObject:leg];
+            
+        }
+        
+        _legs = [[NSArray alloc] initWithArray:legs];
         
         _overviewPolyline = dictionary[@"overview_polyline"][@"points"];
         
