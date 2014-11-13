@@ -14,6 +14,13 @@
 		FCE77ABA1A132DF000E9763D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FCE77AB91A132DF000E9763D /* Images.xcassets */; };
 		FCE77ABD1A132DF000E9763D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = FCE77ABB1A132DF000E9763D /* LaunchScreen.xib */; };
 		FCE77AC91A132DF000E9763D /* Bike_PartyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AC81A132DF000E9763D /* Bike_PartyTests.m */; };
+		FCE77AE01A132E9300E9763D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCE77ADF1A132E9300E9763D /* CoreLocation.framework */; };
+		FCE77AE21A132EDB00E9763D /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCE77AE11A132EDB00E9763D /* MapKit.framework */; };
+		FCE77AF21A13FD9400E9763D /* MFLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AF11A13FD9400E9763D /* MFLocationManager.m */; };
+		FCE77AF51A13FE8C00E9763D /* GooglePlacesSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AF41A13FE8C00E9763D /* GooglePlacesSearch.m */; };
+		FCE77AFD1A14141300E9763D /* GooglePlace.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AFC1A14141300E9763D /* GooglePlace.m */; };
+		FCE77B001A1421B800E9763D /* DestinationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AFF1A1421B800E9763D /* DestinationAnnotation.m */; };
+		FCE77B031A14318A00E9763D /* AddDestinationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B021A14318A00E9763D /* AddDestinationViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +47,18 @@
 		FCE77AC21A132DF000E9763D /* Bike PartyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bike PartyTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCE77AC71A132DF000E9763D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FCE77AC81A132DF000E9763D /* Bike_PartyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Bike_PartyTests.m; sourceTree = "<group>"; };
+		FCE77ADF1A132E9300E9763D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		FCE77AE11A132EDB00E9763D /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		FCE77AF01A13FD9400E9763D /* MFLocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFLocationManager.h; sourceTree = "<group>"; };
+		FCE77AF11A13FD9400E9763D /* MFLocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFLocationManager.m; sourceTree = "<group>"; };
+		FCE77AF31A13FE8C00E9763D /* GooglePlacesSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlacesSearch.h; sourceTree = "<group>"; };
+		FCE77AF41A13FE8C00E9763D /* GooglePlacesSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlacesSearch.m; sourceTree = "<group>"; };
+		FCE77AFB1A14141300E9763D /* GooglePlace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlace.h; sourceTree = "<group>"; };
+		FCE77AFC1A14141300E9763D /* GooglePlace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlace.m; sourceTree = "<group>"; };
+		FCE77AFE1A1421B800E9763D /* DestinationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DestinationAnnotation.h; sourceTree = "<group>"; };
+		FCE77AFF1A1421B800E9763D /* DestinationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DestinationAnnotation.m; sourceTree = "<group>"; };
+		FCE77B011A14318A00E9763D /* AddDestinationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddDestinationViewController.h; sourceTree = "<group>"; };
+		FCE77B021A14318A00E9763D /* AddDestinationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddDestinationViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +66,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCE77AE21A132EDB00E9763D /* MapKit.framework in Frameworks */,
+				FCE77AE01A132E9300E9763D /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +84,8 @@
 		FCE77AA01A132DF000E9763D = {
 			isa = PBXGroup;
 			children = (
+				FCE77AE11A132EDB00E9763D /* MapKit.framework */,
+				FCE77ADF1A132E9300E9763D /* CoreLocation.framework */,
 				FCE77AAB1A132DF000E9763D /* Bike Party */,
 				FCE77AC51A132DF000E9763D /* Bike PartyTests */,
 				FCE77AAA1A132DF000E9763D /* Products */,
@@ -81,6 +104,9 @@
 		FCE77AAB1A132DF000E9763D /* Bike Party */ = {
 			isa = PBXGroup;
 			children = (
+				FCE77AFA1A14131A00E9763D /* Google Places Search */,
+				FCE77AF01A13FD9400E9763D /* MFLocationManager.h */,
+				FCE77AF11A13FD9400E9763D /* MFLocationManager.m */,
 				FCE77AB01A132DF000E9763D /* AppDelegate.h */,
 				FCE77AB11A132DF000E9763D /* AppDelegate.m */,
 				FCE77AB31A132DF000E9763D /* ViewController.h */,
@@ -89,6 +115,10 @@
 				FCE77AB91A132DF000E9763D /* Images.xcassets */,
 				FCE77ABB1A132DF000E9763D /* LaunchScreen.xib */,
 				FCE77AAC1A132DF000E9763D /* Supporting Files */,
+				FCE77AFE1A1421B800E9763D /* DestinationAnnotation.h */,
+				FCE77AFF1A1421B800E9763D /* DestinationAnnotation.m */,
+				FCE77B011A14318A00E9763D /* AddDestinationViewController.h */,
+				FCE77B021A14318A00E9763D /* AddDestinationViewController.m */,
 			);
 			path = "Bike Party";
 			sourceTree = "<group>";
@@ -117,6 +147,17 @@
 				FCE77AC71A132DF000E9763D /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FCE77AFA1A14131A00E9763D /* Google Places Search */ = {
+			isa = PBXGroup;
+			children = (
+				FCE77AF31A13FE8C00E9763D /* GooglePlacesSearch.h */,
+				FCE77AF41A13FE8C00E9763D /* GooglePlacesSearch.m */,
+				FCE77AFB1A14141300E9763D /* GooglePlace.h */,
+				FCE77AFC1A14141300E9763D /* GooglePlace.m */,
+			);
+			name = "Google Places Search";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -168,6 +209,11 @@
 				TargetAttributes = {
 					FCE77AA81A132DF000E9763D = {
 						CreatedOnToolsVersion = 6.1;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 0;
+							};
+						};
 					};
 					FCE77AC11A132DF000E9763D = {
 						CreatedOnToolsVersion = 6.1;
@@ -220,7 +266,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCE77AB51A132DF000E9763D /* ViewController.m in Sources */,
+				FCE77AF21A13FD9400E9763D /* MFLocationManager.m in Sources */,
+				FCE77AFD1A14141300E9763D /* GooglePlace.m in Sources */,
+				FCE77B031A14318A00E9763D /* AddDestinationViewController.m in Sources */,
 				FCE77AB21A132DF000E9763D /* AppDelegate.m in Sources */,
+				FCE77B001A1421B800E9763D /* DestinationAnnotation.m in Sources */,
+				FCE77AF51A13FE8C00E9763D /* GooglePlacesSearch.m in Sources */,
 				FCE77AAF1A132DF000E9763D /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -412,6 +463,7 @@
 				FCE77ACE1A132DF000E9763D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FCE77ACF1A132DF000E9763D /* Build configuration list for PBXNativeTarget "Bike PartyTests" */ = {
 			isa = XCConfigurationList;
@@ -420,6 +472,7 @@
 				FCE77AD11A132DF000E9763D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
