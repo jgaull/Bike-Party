@@ -8,6 +8,7 @@
 
 #import "GoogleDirectionsStep.h"
 #import "CLLocation+GoogleDirections.h"
+#import "MKPolyline+GoogleDirections.h"
 
 @implementation GoogleDirectionsStep
 
@@ -24,7 +25,7 @@
         
         _startLocation = [[CLLocation alloc] initWithDictionary:dictionary[@"start_location"]];
         _endLocation = [[CLLocation alloc] initWithDictionary:dictionary[@"end_location"]];
-        _polyline = dictionary[@"polyline"][@"points"];
+        _polyline = [MKPolyline polylineWithEncodedString:dictionary[@"polyline"][@"points"]];
         _htmlInstructions = dictionary[@"html_instructions"];
         _maneuver = dictionary[@"maneuver"];
         _travelMode = dictionary[@"travel_mode"];

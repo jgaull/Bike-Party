@@ -20,7 +20,7 @@
 @property (nonatomic, readonly) float durationValue;
 @property (nonatomic, readonly) CLLocation *startLocation;
 @property (nonatomic, readonly) CLLocation *endLocation;
-@property (nonatomic, readonly) NSString *polyline;
+@property (nonatomic, readonly) MKPolyline *polyline;
 @property (nonatomic, readonly) NSString *htmlInstructions;
 @property (nonatomic, readonly) NSString *maneuver;
 @property (nonatomic, readonly) NSString *travelMode;
