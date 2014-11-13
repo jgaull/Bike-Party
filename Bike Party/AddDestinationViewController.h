@@ -7,7 +7,25 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-@interface AddDestinationViewController : UIViewController
+#import "GooglePlacesSearch.h"
+
+@class AddDestinationViewController;
+@protocol AddDestinationViewControllerDelegate <NSObject>
+
+@optional
+- (void)addDestinationViewUserDidCancel:(AddDestinationViewController *)addDestinationView;
+- (void)addDestinationView:(AddDestinationViewController *)addDestinationView userDidSelectDestination:(GooglePlace *)destination;
+
+@end
+
+@interface AddDestinationViewController : UIViewController <MKMapViewDelegate, UITextFieldDelegate>
+
+@property (weak, nonatomic) NSObject <AddDestinationViewControllerDelegate> *delegate;
+@property (strong, nonatomic) CLLocation *userLocation;
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField;
 
 @end

@@ -1,21 +1,22 @@
 //
-//  GooglePlacesSearch.m
+//  GoogleDirectionsRequest.m
 //  Bike Party
 //
 //  Created by Jon on 11/12/14.
 //  Copyright (c) 2014 Modeo. All rights reserved.
 //
 
-#import "GooglePlacesSearch.h"
+#import "GoogleDirectionsRequest.h"
+#import "GoogleDirectionsRoute.h"
 
-@interface GooglePlacesSearch ()
+@interface GoogleDirectionsRequest ()
 
-@property (strong, nonatomic) NSURLSession *urlSession;
 @property (strong, nonatomic) NSString *apiKey;
+@property (strong, nonatomic) NSURLSession *urlSession;
 
 @end
 
-@implementation GooglePlacesSearch
+@implementation GoogleDirectionsRequest
 
 - (id)initWithAPIKey:(NSString *)apiKey {
     self = [super init];
@@ -25,13 +26,20 @@
     return self;
 }
 
-- (void)findplaceByName:(NSString *)name nearLocation:(CLLocation *)location withinRadius:(CLLocationDistance)radius WithCallback:(void (^)(NSArray *places, NSError *error))callback {
+- (void)loadDirectionsFromPlace:(GooglePlace *)origin toPlace:(GooglePlace *)destination WithCallback:(void (^)(NSArray *places, NSError *error))callback {
     
-    if (self.apiKey && ![name isEqualToString:@""] && radius > 0 && location) {
+    if (self.apiKey) {
         
-        NSString *urlFormat = @"https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&key=%@&location=%f,%f&radius=%f&name=%@";
+        NSString *urlFormat = @"https://maps.googleapis.com/maps/api/directions/json?key=%@&origin=%f,%f&destination=%f,%f&mode=bicycling";
         
-        NSString *urlString = [NSString stringWithFormat:urlFormat, self.apiKey, location.coordinate.latitude, location.coordinate.longitude, radius, name];
+        CLLocationCoordinate2D originCoordinate = origin.location.coordinate;
+        CLLocationCoordinate2D destinationCoordinate = destination.location.coordinate;
+        NSString *urlString = [NSString stringWithFormat:urlFormat,
+                               self.apiKey,
+                               originCoordinate.latitude,
+                               originCoordinate.longitude,
+                               destinationCoordinate.latitude,
+                               destinationCoordinate.longitude];
         
         NSMutableURLRequest *urlRequest = [self urlRequestForHTTPMethod:@"GET" withURLString:urlString];
         
@@ -43,14 +51,15 @@
                 if ([responseDictionary[@"status"] isEqualToString:@"OK"]) {
                     //NSLog(@"Success: %@", responseDictionary);
                     
-                    NSArray *results = responseDictionary[@"results"];
-                    NSMutableArray *places = [NSMutableArray new];
+                    NSArray *results = responseDictionary[@"routes"];
+                    NSMutableArray *routes = [NSMutableArray new];
                     
-                    for (NSDictionary *placeDictionary in results) {
-                        GooglePlace *place = [[GooglePlace alloc] initWithDictionary:placeDictionary];
-                        [places addObject:place];
+                    for (NSDictionary *routeDictionary in results) {
+                        GoogleDirectionsRoute *route = [[GoogleDirectionsRoute alloc] initWithDictionary:routeDictionary];
+                        [routes addObject:route];
                     }
-                    callback(places, nil);
+                    
+                    callback(routes, nil);
                 }
                 else {
                     //NSLog(@"Error JSON decoding: %@", error.localizedDescription);

@@ -1,5 +1,5 @@
 //
-//  GooglePlacesSearch.h
+//  GoogleDirectionsRequest.h
 //  Bike Party
 //
 //  Created by Jon on 11/12/14.
@@ -11,9 +11,9 @@
 
 #import "GooglePlace.h"
 
-@interface GooglePlacesSearch : NSObject
+@interface GoogleDirectionsRequest : NSObject
 
 - (id)initWithAPIKey:(NSString *)apiKey;
-- (void)findplaceByName:(NSString *)name nearLocation:(CLLocation *)location withinRadius:(CLLocationDistance)radius WithCallback:(void (^)(NSArray *places, NSError *error))callback;
+- (void)loadDirectionsFromPlace:(GooglePlace *)origin toPlace:(GooglePlace *)destination WithCallback:(void (^)(NSArray *places, NSError *error))callback;
 
 @end

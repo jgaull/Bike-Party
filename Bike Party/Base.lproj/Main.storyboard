@@ -5,10 +5,10 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Add Destination View Controller-->
         <scene sceneID="V1m-cm-E7Z">
             <objects>
-                <viewController id="d5R-PP-HPV" sceneMemberID="viewController">
+                <viewController id="d5R-PP-HPV" customClass="AddDestinationViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="mS9-9Q-lsp"/>
                         <viewControllerLayoutGuide type="bottom" id="Q4x-wB-3S9"/>
@@ -16,12 +16,61 @@
                     <view key="view" contentMode="scaleToFill" id="gL7-fJ-ohL">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="EXN-oT-Txy">
+                                <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                                <connections>
+                                    <outlet property="delegate" destination="d5R-PP-HPV" id="fFY-Gc-t28"/>
+                                </connections>
+                            </mapView>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="76e-bM-2tr">
+                                <rect key="frame" x="0.0" y="20" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="Epr-Gz-wMK"/>
+                                </constraints>
+                                <items>
+                                    <navigationItem id="pBR-DJ-h1l">
+                                        <nil key="title"/>
+                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="9Ed-aW-GkW">
+                                            <connections>
+                                                <action selector="userDidTapCancelButton:" destination="d5R-PP-HPV" id="Eso-WV-C6z"/>
+                                            </connections>
+                                        </barButtonItem>
+                                        <textField key="titleView" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search" minimumFontSize="17" clearButtonMode="always" id="fj1-Z5-pV8">
+                                            <rect key="frame" x="83" y="7" width="434" height="30"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <textInputTraits key="textInputTraits" autocapitalizationType="words" returnKeyType="done"/>
+                                            <connections>
+                                                <outlet property="delegate" destination="d5R-PP-HPV" id="MHy-bN-3mV"/>
+                                            </connections>
+                                        </textField>
+                                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="6BO-ib-PMM"/>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="EXN-oT-Txy" firstAttribute="leading" secondItem="gL7-fJ-ohL" secondAttribute="leadingMargin" constant="-16" id="09g-Fr-bDA"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="EXN-oT-Txy" secondAttribute="trailing" constant="-16" id="3OM-ua-fjG"/>
+                            <constraint firstItem="76e-bM-2tr" firstAttribute="top" secondItem="mS9-9Q-lsp" secondAttribute="bottom" id="mPm-T6-raV"/>
+                            <constraint firstItem="EXN-oT-Txy" firstAttribute="top" secondItem="76e-bM-2tr" secondAttribute="bottom" id="oip-SR-akH"/>
+                            <constraint firstItem="76e-bM-2tr" firstAttribute="leading" secondItem="gL7-fJ-ohL" secondAttribute="leadingMargin" constant="-16" id="pRo-az-Ch9"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="76e-bM-2tr" secondAttribute="trailing" constant="-16" id="uYT-Js-aAL"/>
+                            <constraint firstItem="Q4x-wB-3S9" firstAttribute="top" secondItem="EXN-oT-Txy" secondAttribute="bottom" id="y5b-yy-vPR"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="cancelButton" destination="9Ed-aW-GkW" id="hWY-8I-M71"/>
+                        <outlet property="doneButton" destination="6BO-ib-PMM" id="lRS-mG-KZz"/>
+                        <outlet property="mapView" destination="EXN-oT-Txy" id="TfA-cY-Rnz"/>
+                        <outlet property="searchTextField" destination="fj1-Z5-pV8" id="CmZ-0t-EaM"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0rf-2n-uWV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1273" y="548"/>
+            <point key="canvasLocation" x="1267" y="541"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="ufC-wZ-h7g">
@@ -52,6 +101,7 @@
                                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="94P-Od-qeX">
                                             <connections>
                                                 <action selector="userDidTapAddWaypoint:" destination="vXZ-lx-hvc" id="dLV-mU-bno"/>
+                                                <segue destination="d5R-PP-HPV" kind="presentation" id="2eF-zt-aCM"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>
