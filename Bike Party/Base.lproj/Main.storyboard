@@ -94,14 +94,7 @@
                                     <constraint firstAttribute="height" constant="44" id="3wN-Xa-kFp"/>
                                 </constraints>
                                 <items>
-                                    <navigationItem title="Ride Creator" id="qFN-Z7-YOu">
-                                        <barButtonItem key="leftBarButtonItem" title="List" id="cCK-Ts-PYM"/>
-                                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="94P-Od-qeX">
-                                            <connections>
-                                                <action selector="userDidTapAddWaypoint:" destination="vXZ-lx-hvc" id="PjA-Ed-7Dm"/>
-                                            </connections>
-                                        </barButtonItem>
-                                    </navigationItem>
+                                    <navigationItem title="Ride Creator" id="qFN-Z7-YOu"/>
                                 </items>
                             </navigationBar>
                         </subviews>

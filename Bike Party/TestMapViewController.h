@@ -13,7 +13,7 @@
 @interface TestMapViewController : UIViewController <MKMapViewDelegate, UIGestureRecognizerDelegate>
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation;
-//- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated;
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated;
 //- (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated;
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer;
