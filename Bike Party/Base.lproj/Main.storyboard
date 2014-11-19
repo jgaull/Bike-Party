@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="B47-zm-WlL">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -70,51 +70,6 @@
             </objects>
             <point key="canvasLocation" x="1394" y="228"/>
         </scene>
-        <!--Google Maps Test Map-->
-        <scene sceneID="sVd-LI-Zl4">
-            <objects>
-                <viewController id="B47-zm-WlL" customClass="GoogleMapsTestMap" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Ish-dp-9xf"/>
-                        <viewControllerLayoutGuide type="bottom" id="v4Y-XZ-bOD"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="uDA-q8-4JW">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4iJ-2l-rw7">
-                                <rect key="frame" x="0.0" y="28" width="600" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="y4P-WD-Ora"/>
-                                </constraints>
-                                <items>
-                                    <navigationItem title="Map" id="J2T-CL-tmo"/>
-                                </items>
-                            </navigationBar>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lHx-eL-kfT">
-                                <rect key="frame" x="0.0" y="72" width="600" height="528"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="v4Y-XZ-bOD" firstAttribute="top" secondItem="lHx-eL-kfT" secondAttribute="bottom" id="LO7-35-agO"/>
-                            <constraint firstItem="lHx-eL-kfT" firstAttribute="top" secondItem="4iJ-2l-rw7" secondAttribute="bottom" id="VZW-jD-n9d"/>
-                            <constraint firstItem="4iJ-2l-rw7" firstAttribute="leading" secondItem="uDA-q8-4JW" secondAttribute="leadingMargin" constant="-16" id="m6P-9z-N0D"/>
-                            <constraint firstItem="lHx-eL-kfT" firstAttribute="leading" secondItem="uDA-q8-4JW" secondAttribute="leadingMargin" constant="-16" id="pOt-sR-3PI"/>
-                            <constraint firstItem="4iJ-2l-rw7" firstAttribute="top" secondItem="Ish-dp-9xf" secondAttribute="bottom" constant="8" id="sPf-wi-pKP"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="4iJ-2l-rw7" secondAttribute="trailing" constant="-16" id="sU3-W4-tMF"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="lHx-eL-kfT" secondAttribute="trailing" constant="-16" id="tC3-8D-zMD"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="mapPlaceholderView" destination="lHx-eL-kfT" id="bH4-Kh-9wQ"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dAi-vm-9Cv" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="636" y="-440"/>
-        </scene>
         <!--Test Map View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
@@ -141,7 +96,11 @@
                                 <items>
                                     <navigationItem title="Ride Creator" id="qFN-Z7-YOu">
                                         <barButtonItem key="leftBarButtonItem" title="List" id="cCK-Ts-PYM"/>
-                                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="94P-Od-qeX"/>
+                                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="94P-Od-qeX">
+                                            <connections>
+                                                <action selector="userDidTapAddWaypoint:" destination="vXZ-lx-hvc" id="PjA-Ed-7Dm"/>
+                                            </connections>
+                                        </barButtonItem>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
