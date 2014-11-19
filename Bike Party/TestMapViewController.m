@@ -21,8 +21,7 @@
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinch;
 
 @property (nonatomic) MKCoordinateRegion originalRegion;
-@property (nonatomic) CLLocationCoordinate2D originalCenter;
-@property (nonatomic) BOOL hasPanned;
+@property (strong, nonatomic) CLLocation *originalCenter;
 
 @end
 
@@ -54,17 +53,25 @@
         self.mapView.scrollEnabled = NO;
         self.mapView.zoomEnabled = NO;
         
-        CGPoint oldPointInView = [self.mapView convertCoordinate:self.originalCenter toPointToView:self.mapView];
+        /*
+        CGPoint oldPointInView = [self.mapView convertCoordinate:self.originalCenter.coordinate toPointToView:self.mapView];
         CGPoint newPointInView = self.mapView.center;
         CGFloat distance = hypotf(newPointInView.x - oldPointInView.x, newPointInView.y - oldPointInView.y);
-        NSLog(@"distance: %f", distance);
-        if (distance < 100 && self.hasPanned) {
-            [self.mapView setCenterCoordinate:self.originalCenter animated:NO];
-            self.mapView.centerCoordinate = self.originalCenter;
-            self.hasPanned = NO;
+        
+        if (distance < 150 && self.originalCenter) {
+            NSLog(@"reset from pan");
+            self.mapView.centerCoordinate = self.originalCenter.coordinate;
+        }
+         */
+        
+        if (!self.originalCenter) {
+            CLLocationCoordinate2D centerCoordinate = self.mapView.centerCoordinate;
+            self.originalCenter = [[CLLocation alloc] initWithLatitude:centerCoordinate.latitude longitude:centerCoordinate.longitude];
         }
         
         self.originalRegion = self.mapView.region;
+        
+        //NSLog(@"old center: %f, %f", self.originalCenter.coordinate.latitude, self.originalCenter.coordinate.longitude);
     }
     else if (pinch.state == UIGestureRecognizerStateChanged) {
         //NSLog(@"pinch changed");
@@ -77,7 +84,7 @@
         londelta = MAX(MIN(londelta, 150), 0);
         MKCoordinateSpan span = MKCoordinateSpanMake(latdelta, londelta);
         
-        [self.mapView setRegion:MKCoordinateRegionMake(self.originalRegion.center, span) animated:NO];
+        [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
     }
     else if (pinch.state == UIGestureRecognizerStateCancelled) {
         //NSLog(@"pinch cancelled");
@@ -86,6 +93,10 @@
         //NSLog(@"pinch ended");
         self.mapView.scrollEnabled = YES;
         self.mapView.zoomEnabled = YES;
+        
+        //NSLog(@"new center: %f, %f", self.mapView.centerCoordinate.latitude, self.mapView.centerCoordinate.longitude);
+        
+        //self.originalCenter = nil;
     }
 }
 
@@ -129,19 +140,16 @@
     }
     else if (pan.state == UIGestureRecognizerStateBegan) {
         NSLog(@"pan began");
-        self.hasPanned = YES;
-        self.originalCenter = self.mapView.centerCoordinate;
+        self.originalCenter = nil;
     }
     else if (pan.state == UIGestureRecognizerStateChanged) {
         //NSLog(@"num touches = %lu", (unsigned long)pan.numberOfTouches);
     }
     else if (pan.state == UIGestureRecognizerStateCancelled) {
         NSLog(@"pan cancelled");
-        self.hasPanned = NO;
     }
     else if (pan.state == UIGestureRecognizerStateEnded) {
         NSLog(@"pan ended");
-        self.hasPanned = NO;
     }
 }
 
