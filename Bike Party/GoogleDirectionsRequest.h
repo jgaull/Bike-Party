@@ -9,12 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
-#import "GooglePlace.h"
-
 @interface GoogleDirectionsRequest : NSObject
 
 - (id)initWithAPIKey:(NSString *)apiKey;
-- (void)loadDirectionsFromPlace:(GooglePlace *)origin toPlace:(GooglePlace *)destination WithCallback:(void (^)(NSArray *places, NSError *error))callback;
-- (void)loadDirectionsForPath:(NSArray *)path WithCallback:(void (^)(NSArray *places, NSError *error))callback;
+- (void)loadDirectionsFromPlace:(CLLocation *)origin toPlace:(CLLocation *)destination WithCallback:(void (^)(NSArray *places, NSError *error))callback;
+- (void)loadDirectionsForPath:(NSArray *)path WithCallback:(void (^)(NSArray *routes, NSError *error))callback;
 
 @end
