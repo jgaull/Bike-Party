@@ -193,7 +193,7 @@
 }
 
 - (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
-    if (longPress.state == UIGestureRecognizerStateBegan) {
+    if (longPress.state == UIGestureRecognizerStateEnded) {
         NSLog(@"Long pressed");
         
         self.didDropPin = YES;
