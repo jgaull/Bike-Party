@@ -22,9 +22,11 @@
 @property (strong, nonatomic) UIPanGestureRecognizer *pan;
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinch;
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTap;
+@property (strong, nonatomic) TouchGestureRecognizer *touch;
 
 @property (nonatomic) MKCoordinateRegion originalRegion;
 @property (strong, nonatomic) CLLocation *originalCenter;
+@property (nonatomic) BOOL cancelZoomMomentum;
 
 @property (strong, nonatomic) UIBarButtonItem *doneButton;
 @property (strong, nonatomic) UIBarButtonItem *cancelButton;
@@ -49,6 +51,10 @@
     self.doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
     self.doubleTap.numberOfTapsRequired = 2;
     self.doubleTap.cancelsTouchesInView = YES;
+    
+    self.touch = [[TouchGestureRecognizer alloc] initWithTarget:self action:@selector(handleTouch:)];
+    self.touch.delegate = self;
+    [self.mapView addGestureRecognizer:self.touch];
     
     self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(userDidTapDone:)];
     self.cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(userDidTapCancel:)];
@@ -89,22 +95,34 @@
     self.mapView.zoomEnabled = YES;
 }
 
+- (void)handleTouch:(TouchGestureRecognizer *)touch {
+    if (touch.state == UIGestureRecognizerStateBegan) {
+        self.cancelZoomMomentum = YES;
+    }
+}
+
 - (void)handleDoubleTap:(UITapGestureRecognizer *)doubleTap {
-    //NSLog(@"Double tap");
+    //NSLog(@"Double tap: %ld", doubleTap.state);
     
-    float zoomMultiplier = 0.5;
-    MKCoordinateSpan currentSpan = self.mapView.region.span;
-    MKCoordinateSpan zoomedSpan = MKCoordinateSpanMake(currentSpan.latitudeDelta * zoomMultiplier, currentSpan.longitudeDelta * zoomMultiplier);
-    
-    CLLocationCoordinate2D targetCenter;
-    if (self.originalCenter) {
-        targetCenter = self.originalCenter.coordinate;
+    if (doubleTap.state == UIGestureRecognizerStateEnded) {
+        
+        self.cancelZoomMomentum = YES;
+        //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
+        
+        float zoomMultiplier = 0.5;
+        MKCoordinateSpan currentSpan = self.mapView.region.span;
+        MKCoordinateSpan zoomedSpan = MKCoordinateSpanMake(currentSpan.latitudeDelta * zoomMultiplier, currentSpan.longitudeDelta * zoomMultiplier);
+        
+        CLLocationCoordinate2D targetCenter;
+        if (self.originalCenter) {
+            targetCenter = self.originalCenter.coordinate;
+        }
+        else {
+            targetCenter = self.mapView.centerCoordinate;
+        }
+        
+        [self.mapView setRegion:MKCoordinateRegionMake(targetCenter, zoomedSpan) animated:YES];
     }
-    else {
-        targetCenter = self.mapView.centerCoordinate;
-    }
-    
-    [self.mapView setRegion:MKCoordinateRegionMake(targetCenter, zoomedSpan) animated:YES];
 }
 
 - (void)handlePinch:(UIPinchGestureRecognizer *)pinch {
@@ -115,7 +133,11 @@
         //NSLog(@"pinch possible");
     }
     else if (pinch.state == UIGestureRecognizerStateBegan) {
-        //NSLog(@"pinch began");
+        NSLog(@"pinch began");
+        
+        self.cancelZoomMomentum = YES;
+        //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
+        
         self.mapView.scrollEnabled = NO;
         
         /*
@@ -144,7 +166,7 @@
         double latdelta = self.originalRegion.span.latitudeDelta / pinch.scale;
         double londelta = self.originalRegion.span.longitudeDelta / pinch.scale;
         
-        NSLog(@"pinch scale: %f", pinch.scale);
+        //NSLog(@"pinch scale: %f", pinch.scale);
         
         // TODO: set these constants to appropriate values to set max/min zoomscale
         latdelta = MAX(MIN(latdelta, 150), 0);
@@ -154,69 +176,19 @@
         [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
     }
     else if (pinch.state == UIGestureRecognizerStateCancelled) {
-        //NSLog(@"pinch cancelled");
+        NSLog(@"pinch cancelled");
     }
     else if (pinch.state == UIGestureRecognizerStateEnded) {
-        //NSLog(@"pinch ended");
+        NSLog(@"pinch ended");
         self.mapView.scrollEnabled = YES;
         
         //NSLog(@"new center: %f, %f", self.mapView.centerCoordinate.latitude, self.mapView.centerCoordinate.longitude);
         
-        NSLog(@"velocity: %f", pinch.velocity);
-        [self mapZoomUpdatesLoop:pinch];
+        //NSLog(@"velocity: %f", pinch.velocity);
+        self.cancelZoomMomentum = NO;
+        [self mapZoomUpdatesLoop];
         
         //self.originalCenter = nil;
-    }
-}
-
-static float velocityDecay = 0.9;
-static float otherVelocityDecay = 0.75;
-static float pinchScale;
-static float currentVelocity;
-static NSDate *lastRun;
-static float maxVelocity = 8;
-- (void)mapZoomUpdatesLoop:(UIPinchGestureRecognizer *)pinch {
-    
-    if (!lastRun) {
-        lastRun = [NSDate date];
-        currentVelocity = MIN(pinch.velocity, maxVelocity);
-        pinchScale = pinch.scale;
-    }
-    
-    float timeSinceLastRun = ABS([lastRun timeIntervalSinceNow]);
-    
-    float decay = currentVelocity > 0 ? velocityDecay : otherVelocityDecay;
-    currentVelocity *= decay;
-    pinchScale = currentVelocity * timeSinceLastRun;
-    
-    //NSLog(@"currentVelocity: %f", currentVelocity);
-    
-    //double latitudeDelta = self.originalRegion.span.latitudeDelta / pinchScale;
-    //double longitudeDelta = self.originalRegion.span.longitudeDelta / pinchScale;
-    
-    double latitudeDelta = self.mapView.region.span.latitudeDelta * (1 - pinchScale);
-    double longitudeDelta = self.mapView.region.span.longitudeDelta * (1 - pinchScale);
-    
-    
-    NSLog(@"%f,%f", self.mapView.region.span.latitudeDelta, pinchScale);
-    
-    //NSLog(@"%f, %f", latitudeDelta, longitudeDelta);
-    
-    // TODO: set these constants to appropriate values to set max/min zoomscale
-    latitudeDelta = MAX(MIN(latitudeDelta, 150), 0);
-    longitudeDelta = MAX(MIN(longitudeDelta, 150), 0);
-    MKCoordinateSpan span = MKCoordinateSpanMake(latitudeDelta, longitudeDelta);
-    
-    [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
-    
-    if (ABS(currentVelocity) > 0.05) {
-        
-        lastRun = [NSDate date];
-        [self performSelector:@selector(mapZoomUpdatesLoop:) withObject:pinch afterDelay:1.0 / 120];
-    }
-    else {
-        NSLog(@"Zoom over.");
-        lastRun = nil;
     }
 }
 
@@ -256,8 +228,10 @@ static float maxVelocity = 8;
         //NSLog(@"pan possible");
     }
     else if (pan.state == UIGestureRecognizerStateBegan) {
-        //NSLog(@"pan began");
+        NSLog(@"pan began");
         self.originalCenter = nil;
+        self.cancelZoomMomentum = YES;
+        //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
     }
     else if (pan.state == UIGestureRecognizerStateChanged) {
         //NSLog(@"num touches = %lu", (unsigned long)pan.numberOfTouches);
@@ -266,7 +240,7 @@ static float maxVelocity = 8;
         //NSLog(@"pan cancelled");
     }
     else if (pan.state == UIGestureRecognizerStateEnded) {
-        //NSLog(@"pan ended");
+        NSLog(@"pan ended");
     }
 }
 
@@ -312,6 +286,67 @@ static float maxVelocity = 8;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     
     return YES;
+}
+
+static float velocityDecay = 0.9;
+static float otherVelocityDecay = 0.75;
+static float pinchScale;
+static float currentVelocity;
+static NSDate *lastRun;
+static float maxVelocity = 8;
+- (void)mapZoomUpdatesLoop {
+    
+    if (self.cancelZoomMomentum) {
+        lastRun = nil;
+        self.cancelZoomMomentum = NO;
+        return;
+    }
+    
+    if (!lastRun) {
+        lastRun = [NSDate date];
+        currentVelocity = MIN(self.pinch.velocity, maxVelocity);
+        pinchScale = self.pinch.scale;
+    }
+    
+    float timeSinceLastRun = ABS([lastRun timeIntervalSinceNow]);
+    
+    float decay = currentVelocity > 0 ? velocityDecay : otherVelocityDecay;
+    currentVelocity *= decay;
+    pinchScale = currentVelocity * timeSinceLastRun;
+    
+    //NSLog(@"currentVelocity: %f", currentVelocity);
+    
+    //double latitudeDelta = self.originalRegion.span.latitudeDelta / pinchScale;
+    //double longitudeDelta = self.originalRegion.span.longitudeDelta / pinchScale;
+    
+    double latitudeDelta = self.mapView.region.span.latitudeDelta * (1 - pinchScale);
+    double longitudeDelta = self.mapView.region.span.longitudeDelta * (1 - pinchScale);
+    
+    
+    //NSLog(@"%f,%f", self.mapView.region.span.latitudeDelta, pinchScale);
+    
+    //NSLog(@"%f, %f", latitudeDelta, longitudeDelta);
+    
+    // TODO: set these constants to appropriate values to set max/min zoomscale
+    float minDelta = 0.003432;
+    float maxDelta = 150;
+    latitudeDelta = MAX(MIN(latitudeDelta, maxDelta), minDelta);
+    longitudeDelta = MAX(MIN(longitudeDelta, maxDelta), minDelta);
+    MKCoordinateSpan span = MKCoordinateSpanMake(latitudeDelta, longitudeDelta);
+    
+    //NSLog(@"%f, %f", latitudeDelta, longitudeDelta);
+    
+    [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
+    
+    if (ABS(currentVelocity) > 0.05 && latitudeDelta < maxDelta && latitudeDelta > minDelta && longitudeDelta < maxDelta && longitudeDelta > minDelta) {
+        
+        lastRun = [NSDate date];
+        [self performSelector:@selector(mapZoomUpdatesLoop) withObject:nil afterDelay:1.0 / 120];
+    }
+    else {
+        //NSLog(@"Zoom over.");
+        lastRun = nil;
+    }
 }
 
 @end
