@@ -6,13 +6,12 @@
 //  Copyright (c) 2014 Modeo. All rights reserved.
 //
 
-#import "TestMapViewController.h"
+#import "EditRouteMapViewController.h"
 #import "TouchGestureRecognizer.h"
 
-@interface TestMapViewController ()
+@interface EditRouteMapViewController ()
 
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
-@property (weak, nonatomic) IBOutlet UINavigationBar *navBar;
 
 @property (nonatomic) BOOL didDropPin;
 @property (strong, nonatomic) MKPinAnnotationView *pinView;
@@ -28,19 +27,83 @@
 @property (nonatomic) MKCoordinateRegion originalRegion;
 @property (strong, nonatomic) CLLocation *originalCenter;
 
-@property (strong, nonatomic) UIBarButtonItem *doneButton;
-@property (strong, nonatomic) UIBarButtonItem *cancelButton;
+@property (strong, nonatomic) NSMutableArray *mutableWaypoints;
+@property (strong, nonatomic) NSMutableDictionary *polylines;
 
 @end
 
-@implementation TestMapViewController
+@implementation EditRouteMapViewController
 
+#pragma mark - Public Interface
+- (void)confirmEdits {
+    CLLocationCoordinate2D coordinate;
+    if (self.originalCenter) {
+        coordinate = self.originalCenter.coordinate;
+    }
+    else {
+        coordinate = self.mapView.centerCoordinate;
+    }
+    
+    self.editingAnnotation.coordinate = coordinate;
+    [self.mapView addAnnotation:self.editingAnnotation];
+    
+    Waypoint *waypoint = [[Waypoint alloc] initWithCoordinate:coordinate andName:nil];
+    [self.mutableWaypoints addObject:waypoint];
+    
+    [self endEditing];
+}
+
+- (void)cancelEdits {
+    [self endEditing];
+}
+
+- (void)addPolyline:(MKPolyline *)polyline withIdentifier:(NSString *)identifier {
+    
+    MKPolyline *previousPolyline = [self.polylines objectForKey:identifier];
+    if (previousPolyline) {
+        [self removePolylineWithIdentifier:identifier];
+    }
+    
+    [self.polylines setObject:polyline forKey:identifier];
+    [self.mapView addOverlay:polyline];
+}
+
+- (void)removePolylineWithIdentifier:(NSString *)identifier {
+    
+    MKPolyline *polyline = [self.polylines objectForKey:identifier];
+    if (polyline) {
+        [self.mapView removeOverlay:polyline];
+        [self.polylines removeObjectForKey:identifier];
+    }
+}
+
+- (void)showPolylineWithIdentifier:(NSString *)identifier animated:(BOOL)animated {
+    /*
+    if (self.state != kViewControllerStateEditing) {
+        MKCoordinateSpan span = route.bounds.span;
+        MKCoordinateSpan paddedSpan = MKCoordinateSpanMake(span.latitudeDelta + EDGE_PAD, span.longitudeDelta + EDGE_PAD);
+        MKCoordinateRegion paddedRegion = MKCoordinateRegionMake(route.bounds.center, paddedSpan);
+        
+        [self.mapView setRegion:paddedRegion animated:YES];
+    }
+     */
+}
+
+#pragma mark - UIViewController overrides
 - (void)viewDidLoad {
+    
+    [super viewDidLoad];
+    
+    //long press is used to add waypoints
     self.longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     [self.mapView addGestureRecognizer:self.longPress];
     
+    //tap is also used to add waypoints
     self.tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
     
+    //The default double tap behavior (zoom the map in) conflicts with our single tap.
+    //We fix this problem by finding the double tap gesture recognizer and requiring
+    //The single tap to fail in the event of a double tap
     for (UIView *view in self.mapView.subviews) {
         for (UIGestureRecognizer *gesture in view.gestureRecognizers) {
             if ([gesture isKindOfClass:[UITapGestureRecognizer class]]) {
@@ -55,86 +118,39 @@
     
     [self.mapView addGestureRecognizer:self.tap];
     
+    //Pinch used for zooming in and out while editing
     self.pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
     self.pinch.delegate = self;
     self.pinch.cancelsTouchesInView = YES;
     
+    //Pan is used to determine when the user moves the map so we can
+    //properly lock and unlock the center while editing
     self.pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     self.pan.maximumNumberOfTouches = 1;
     self.pan.delegate = self;
     
+    //Double tap is used to manually override the default double tap to zoom
+    //We need to do this to keep the center locked while editing.
     self.doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
     self.doubleTap.numberOfTapsRequired = 2;
     self.doubleTap.cancelsTouchesInView = YES;
     
+    //This prevents the zoom in and out momentum from overriding our pan gestures.
+    //We cancel the momentum as soon as the user touches the screen.
     self.touch = [[TouchGestureRecognizer alloc] initWithTarget:self action:@selector(handleTouch:)];
     self.touch.delegate = self;
-    
-    self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(userDidTapDone:)];
-    self.cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(userDidTapCancel:)];
-}
-
-- (void)handleTap:(UITapGestureRecognizer *)tap {
-    if (tap.state == UIGestureRecognizerStateEnded) {
-        //NSLog(@"Long pressed");
-        
-        self.didDropPin = YES;
-        
-        CGPoint touchPoint = [tap locationInView:self.mapView];
-        CLLocationCoordinate2D locationOnMap = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
-        
-        MKPointAnnotation *annotation = [MKPointAnnotation new];
-        annotation.coordinate = locationOnMap;
-        self.editingAnnotation = annotation;
-        [self.mapView addAnnotation:annotation];
-        
-        MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(locationOnMap, 0.005131, 0.004123);
-        [self.mapView setRegion:region animated:YES];
-        
-        [self.mapView removeGestureRecognizer:self.longPress];
-        [self.mapView removeGestureRecognizer:self.tap];
-        
-        [self.mapView addGestureRecognizer:self.touch];
-        [self.mapView addGestureRecognizer:self.pinch];
-        [self.mapView addGestureRecognizer:self.doubleTap];
-        [self.mapView addGestureRecognizer:self.pan];
-        
-        [self.navBar.topItem setLeftBarButtonItem:self.cancelButton animated:YES];
-        [self.navBar.topItem setRightBarButtonItem:self.doneButton animated:YES];
-        
-        self.mapView.zoomEnabled = NO;
-    }
 }
 
 #pragma mark - UIGestureRecognizer handlers
+- (void)handleTap:(UITapGestureRecognizer *)tap {
+    if (tap.state == UIGestureRecognizerStateEnded) {
+        [self beginEditingWithGesture:tap];
+    }
+}
+
 - (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
     if (longPress.state == UIGestureRecognizerStateBegan) {
-        //NSLog(@"Long pressed");
-        
-        self.didDropPin = YES;
-        
-        CGPoint touchPoint = [longPress locationInView:self.mapView];
-        CLLocationCoordinate2D locationOnMap = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
-        
-        MKPointAnnotation *annotation = [MKPointAnnotation new];
-        annotation.coordinate = locationOnMap;
-        self.editingAnnotation = annotation;
-        [self.mapView addAnnotation:annotation];
-        
-        MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(locationOnMap, 0.005131, 0.004123);
-        [self.mapView setRegion:region animated:YES];
-        
-        [self.mapView removeGestureRecognizer:self.longPress];
-        
-        [self.mapView addGestureRecognizer:self.touch];
-        [self.mapView addGestureRecognizer:self.pinch];
-        [self.mapView addGestureRecognizer:self.doubleTap];
-        [self.mapView addGestureRecognizer:self.pan];
-        
-        [self.navBar.topItem setLeftBarButtonItem:self.cancelButton animated:YES];
-        [self.navBar.topItem setRightBarButtonItem:self.doneButton animated:YES];
-        
-        self.mapView.zoomEnabled = NO;
+        [self beginEditingWithGesture:longPress];
     }
 }
 
@@ -214,7 +230,7 @@
     }
 }
 
-#pragma mark - UIMapViewDelegate Methods
+#pragma mark - MKMapViewDelegate Methods
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
     MKPinAnnotationView *pin = (MKPinAnnotationView *) [self.mapView dequeueReusableAnnotationViewWithIdentifier: @"destinationPin"];
     if (pin == nil) {
@@ -254,36 +270,60 @@
     }
 }
 
+- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay {
+    
+    MKPolylineRenderer *polylineRenderer = [[MKPolylineRenderer alloc] initWithPolyline:overlay];
+    polylineRenderer.strokeColor = [UIColor redColor];
+    polylineRenderer.lineWidth = 3.0;
+    
+    return polylineRenderer;
+}
+
 #pragma mark - UIGestureRecognizerDelegate Methods
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     
     return YES;
 }
 
-#pragma mark - Button Handlers
-- (void)userDidTapDone:(UIBarButtonItem *)button {
-    
-    NSLog(@"done");
-    if (self.originalCenter) {
-        self.editingAnnotation.coordinate = self.originalCenter.coordinate;
-    }
-    else {
-        self.editingAnnotation.coordinate = self.mapView.centerCoordinate;
-    }
-    
-    [self.mapView addAnnotation:self.editingAnnotation];
-    [self endEditing];
-}
-
-- (void)userDidTapCancel:(UIBarButtonItem *)button {
-    NSLog(@"cancel");
-    [self endEditing];
-}
-
 #pragma mark - helper methods
+- (void)beginEditingWithGesture:(UIGestureRecognizer *)gesture {
+    
+    //When the pin and map are centered we use this
+    self.didDropPin = YES;
+    
+    //Determine the location of the touch
+    CGPoint touchPoint = [gesture locationInView:self.mapView];
+    CLLocationCoordinate2D locationOnMap = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
+    
+    //Create an annotation to add a pin to the map
+    MKPointAnnotation *annotation = [MKPointAnnotation new];
+    annotation.coordinate = locationOnMap;
+    self.editingAnnotation = annotation;
+    [self.mapView addAnnotation:annotation];
+    
+    MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(locationOnMap, 0.005131, 0.004123);
+    [self.mapView setRegion:region animated:YES];
+    
+    [self.mapView removeGestureRecognizer:self.longPress];
+    [self.mapView removeGestureRecognizer:self.tap];
+    
+    [self.mapView addGestureRecognizer:self.touch];
+    [self.mapView addGestureRecognizer:self.pinch];
+    [self.mapView addGestureRecognizer:self.doubleTap];
+    [self.mapView addGestureRecognizer:self.pan];
+    
+    self.mapView.zoomEnabled = NO;
+    
+    _state = EditRouteMapViewControllerStateEditing;
+    
+    if ([self.delegate respondsToSelector:@selector(editRouteMap:didBeginEditingWaypoint:)]) {
+#warning Waypoint parameter should not be nil
+        [self.delegate editRouteMap:self didBeginEditingWaypoint:nil];
+    }
+}
+
+
 - (void)endEditing {
-    [self.navBar.topItem setLeftBarButtonItem:nil animated:YES];
-    [self.navBar.topItem setRightBarButtonItem:nil animated:YES];
     [self.pinView removeFromSuperview];
     self.pinView = nil;
     //self.annotation = nil;
@@ -297,6 +337,13 @@
     [self.mapView removeGestureRecognizer:self.pan];
     
     self.mapView.zoomEnabled = YES;
+    
+    _state = EditRouteMapViewControllerStateIdle;
+    
+    if ([self.delegate respondsToSelector:@selector(editRouteMap:didEndEditingWaypoint:)]) {
+#warning Waypoint parameter should not be nil
+        [self.delegate editRouteMap:self didEndEditingWaypoint:nil];
+    }
 }
 
 static float velocityDecay = 0.9;
@@ -343,6 +390,25 @@ static NSDate *lastRun;
 - (void)cancelScrollingUpdate {
     lastRun = nil;
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
+}
+
+#pragma mark - Getters and Setters
+- (NSMutableArray *)mutableWaypoints {
+    if (!_mutableWaypoints) {
+        _mutableWaypoints = [NSMutableArray new];
+    }
+    return _mutableWaypoints;
+}
+
+- (NSMutableDictionary *)polylines {
+    if (!_polylines) {
+        _polylines = [NSMutableDictionary new];
+    }
+    return _polylines;
+}
+
+- (NSArray *)waypoints {
+    return [NSArray arrayWithArray:self.mutableWaypoints];
 }
 
 @end

@@ -7,7 +7,6 @@
 //
 
 #import "GoogleDirectionsRequest.h"
-#import "GoogleDirectionsRoute.h"
 
 @interface GoogleDirectionsRequest ()
 
@@ -58,6 +57,9 @@
                                destinationCoordinate.longitude];
         
         [self loadDirectionsWithUrlString:urlString withCallback:callback];
+    }
+    else {
+        NSLog(@"something isn't set");
     }
 }
 

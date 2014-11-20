@@ -30,7 +30,7 @@
 		FCE77B1F1A16AC5400E9763D /* RouteLeg.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B1E1A16AC5400E9763D /* RouteLeg.m */; };
 		FCE77B221A17419400E9763D /* TouchyFeelyMapView.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B211A17419400E9763D /* TouchyFeelyMapView.m */; };
 		FCE77B251A1755CC00E9763D /* DestinationPin.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B241A1755CC00E9763D /* DestinationPin.m */; };
-		FCE77B2B1A17D91000E9763D /* TestMapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B2A1A17D91000E9763D /* TestMapViewController.m */; };
+		FCE77B2B1A17D91000E9763D /* EditRouteMapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B2A1A17D91000E9763D /* EditRouteMapViewController.m */; };
 		FCE77B2E1A18407100E9763D /* TouchGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B2D1A18407100E9763D /* TouchGestureRecognizer.m */; };
 		FCE77B321A1875DC00E9763D /* GoogleMaps.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCE77B311A1875DC00E9763D /* GoogleMaps.framework */; };
 		FCE77B341A18760400E9763D /* GoogleMaps.bundle in Resources */ = {isa = PBXBuildFile; fileRef = FCE77B331A18760400E9763D /* GoogleMaps.bundle */; };
@@ -46,6 +46,8 @@
 		FCE77B481A18768D00E9763D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCE77B471A18768D00E9763D /* QuartzCore.framework */; };
 		FCE77B4A1A18769500E9763D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCE77B491A18769500E9763D /* SystemConfiguration.framework */; };
 		FCE77B4D1A18773E00E9763D /* GoogleMapsTestMap.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77B4C1A18773E00E9763D /* GoogleMapsTestMap.m */; };
+		FCF57A921A1E81AE0083F71A /* CreateRouteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCF57A911A1E81AE0083F71A /* CreateRouteViewController.m */; };
+		FCF57A951A1E88040083F71A /* Waypoint.m in Sources */ = {isa = PBXBuildFile; fileRef = FCF57A941A1E88040083F71A /* Waypoint.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,8 +104,8 @@
 		FCE77B211A17419400E9763D /* TouchyFeelyMapView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TouchyFeelyMapView.m; sourceTree = "<group>"; };
 		FCE77B231A1755CC00E9763D /* DestinationPin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DestinationPin.h; sourceTree = "<group>"; };
 		FCE77B241A1755CC00E9763D /* DestinationPin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DestinationPin.m; sourceTree = "<group>"; };
-		FCE77B291A17D91000E9763D /* TestMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestMapViewController.h; sourceTree = "<group>"; };
-		FCE77B2A1A17D91000E9763D /* TestMapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestMapViewController.m; sourceTree = "<group>"; };
+		FCE77B291A17D91000E9763D /* EditRouteMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditRouteMapViewController.h; sourceTree = "<group>"; };
+		FCE77B2A1A17D91000E9763D /* EditRouteMapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditRouteMapViewController.m; sourceTree = "<group>"; };
 		FCE77B2C1A18407100E9763D /* TouchGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchGestureRecognizer.h; sourceTree = "<group>"; };
 		FCE77B2D1A18407100E9763D /* TouchGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TouchGestureRecognizer.m; sourceTree = "<group>"; };
 		FCE77B311A1875DC00E9763D /* GoogleMaps.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GoogleMaps.framework; sourceTree = "<group>"; };
@@ -121,6 +123,10 @@
 		FCE77B491A18769500E9763D /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		FCE77B4B1A18773E00E9763D /* GoogleMapsTestMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GoogleMapsTestMap.h; sourceTree = "<group>"; };
 		FCE77B4C1A18773E00E9763D /* GoogleMapsTestMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GoogleMapsTestMap.m; sourceTree = "<group>"; };
+		FCF57A901A1E81AE0083F71A /* CreateRouteViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateRouteViewController.h; sourceTree = "<group>"; };
+		FCF57A911A1E81AE0083F71A /* CreateRouteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateRouteViewController.m; sourceTree = "<group>"; };
+		FCF57A931A1E88040083F71A /* Waypoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Waypoint.h; sourceTree = "<group>"; };
+		FCF57A941A1E88040083F71A /* Waypoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Waypoint.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,12 +218,16 @@
 				FCE77B211A17419400E9763D /* TouchyFeelyMapView.m */,
 				FCE77B231A1755CC00E9763D /* DestinationPin.h */,
 				FCE77B241A1755CC00E9763D /* DestinationPin.m */,
-				FCE77B291A17D91000E9763D /* TestMapViewController.h */,
-				FCE77B2A1A17D91000E9763D /* TestMapViewController.m */,
+				FCE77B291A17D91000E9763D /* EditRouteMapViewController.h */,
+				FCE77B2A1A17D91000E9763D /* EditRouteMapViewController.m */,
 				FCE77B2C1A18407100E9763D /* TouchGestureRecognizer.h */,
 				FCE77B2D1A18407100E9763D /* TouchGestureRecognizer.m */,
 				FCE77B4B1A18773E00E9763D /* GoogleMapsTestMap.h */,
 				FCE77B4C1A18773E00E9763D /* GoogleMapsTestMap.m */,
+				FCF57A901A1E81AE0083F71A /* CreateRouteViewController.h */,
+				FCF57A911A1E81AE0083F71A /* CreateRouteViewController.m */,
+				FCF57A931A1E88040083F71A /* Waypoint.h */,
+				FCF57A941A1E88040083F71A /* Waypoint.m */,
 			);
 			path = "Bike Party";
 			sourceTree = "<group>";
@@ -389,8 +399,9 @@
 				FCE77B2E1A18407100E9763D /* TouchGestureRecognizer.m in Sources */,
 				FCE77AF21A13FD9400E9763D /* MFLocationManager.m in Sources */,
 				FCE77B251A1755CC00E9763D /* DestinationPin.m in Sources */,
-				FCE77B2B1A17D91000E9763D /* TestMapViewController.m in Sources */,
+				FCE77B2B1A17D91000E9763D /* EditRouteMapViewController.m in Sources */,
 				FCE77B101A14685500E9763D /* GoogleDirectionsStep.m in Sources */,
+				FCF57A951A1E88040083F71A /* Waypoint.m in Sources */,
 				FCE77B1F1A16AC5400E9763D /* RouteLeg.m in Sources */,
 				FCE77AFD1A14141300E9763D /* GooglePlace.m in Sources */,
 				FCE77B031A14318A00E9763D /* AddDestinationViewController.m in Sources */,
@@ -401,6 +412,7 @@
 				FCE77B0D1A14614000E9763D /* GoogleDirectionsLeg.m in Sources */,
 				FCE77AF51A13FE8C00E9763D /* GooglePlacesSearch.m in Sources */,
 				FCE77B1C1A14727A00E9763D /* MKPolyline+GoogleDirections.m in Sources */,
+				FCF57A921A1E81AE0083F71A /* CreateRouteViewController.m in Sources */,
 				FCE77B071A1448D000E9763D /* GoogleDirectionsRequest.m in Sources */,
 				FCE77B0A1A14509800E9763D /* GoogleDirectionsRoute.m in Sources */,
 				FCE77B4D1A18773E00E9763D /* GoogleMapsTestMap.m in Sources */,
