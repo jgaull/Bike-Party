@@ -144,6 +144,8 @@
         double latdelta = self.originalRegion.span.latitudeDelta / pinch.scale;
         double londelta = self.originalRegion.span.longitudeDelta / pinch.scale;
         
+        NSLog(@"pinch scale: %f", pinch.scale);
+        
         // TODO: set these constants to appropriate values to set max/min zoomscale
         latdelta = MAX(MIN(latdelta, 150), 0);
         londelta = MAX(MIN(londelta, 150), 0);
@@ -160,9 +162,61 @@
         
         //NSLog(@"new center: %f, %f", self.mapView.centerCoordinate.latitude, self.mapView.centerCoordinate.longitude);
         
-        //NSLog(@"velocity: %f", pinch.velocity);
+        NSLog(@"velocity: %f", pinch.velocity);
+        [self mapZoomUpdatesLoop:pinch];
         
         //self.originalCenter = nil;
+    }
+}
+
+static float velocityDecay = 0.9;
+static float otherVelocityDecay = 0.75;
+static float pinchScale;
+static float currentVelocity;
+static NSDate *lastRun;
+static float maxVelocity = 8;
+- (void)mapZoomUpdatesLoop:(UIPinchGestureRecognizer *)pinch {
+    
+    if (!lastRun) {
+        lastRun = [NSDate date];
+        currentVelocity = MIN(pinch.velocity, maxVelocity);
+        pinchScale = pinch.scale;
+    }
+    
+    float timeSinceLastRun = ABS([lastRun timeIntervalSinceNow]);
+    
+    float decay = currentVelocity > 0 ? velocityDecay : otherVelocityDecay;
+    currentVelocity *= decay;
+    pinchScale = currentVelocity * timeSinceLastRun;
+    
+    //NSLog(@"currentVelocity: %f", currentVelocity);
+    
+    //double latitudeDelta = self.originalRegion.span.latitudeDelta / pinchScale;
+    //double longitudeDelta = self.originalRegion.span.longitudeDelta / pinchScale;
+    
+    double latitudeDelta = self.mapView.region.span.latitudeDelta * (1 - pinchScale);
+    double longitudeDelta = self.mapView.region.span.longitudeDelta * (1 - pinchScale);
+    
+    
+    NSLog(@"%f,%f", self.mapView.region.span.latitudeDelta, pinchScale);
+    
+    //NSLog(@"%f, %f", latitudeDelta, longitudeDelta);
+    
+    // TODO: set these constants to appropriate values to set max/min zoomscale
+    latitudeDelta = MAX(MIN(latitudeDelta, 150), 0);
+    longitudeDelta = MAX(MIN(longitudeDelta, 150), 0);
+    MKCoordinateSpan span = MKCoordinateSpanMake(latitudeDelta, longitudeDelta);
+    
+    [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
+    
+    if (ABS(currentVelocity) > 0.05) {
+        
+        lastRun = [NSDate date];
+        [self performSelector:@selector(mapZoomUpdatesLoop:) withObject:pinch afterDelay:1.0 / 120];
+    }
+    else {
+        NSLog(@"Zoom over.");
+        lastRun = nil;
     }
 }
 
