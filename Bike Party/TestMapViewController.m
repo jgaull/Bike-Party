@@ -19,6 +19,7 @@
 @property (strong, nonatomic) MKPointAnnotation *editingAnnotation;
 
 @property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
+@property (strong, nonatomic) UITapGestureRecognizer *tap;
 @property (strong, nonatomic) UIPanGestureRecognizer *pan;
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinch;
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTap;
@@ -38,6 +39,22 @@
     self.longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     [self.mapView addGestureRecognizer:self.longPress];
     
+    self.tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    
+    for (UIView *view in self.mapView.subviews) {
+        for (UIGestureRecognizer *gesture in view.gestureRecognizers) {
+            if ([gesture isKindOfClass:[UITapGestureRecognizer class]]) {
+                
+                UITapGestureRecognizer *tap = (UITapGestureRecognizer *)gesture;
+                if (tap.numberOfTapsRequired == 2) {
+                    [self.tap requireGestureRecognizerToFail:tap];
+                }
+            }
+        }
+    }
+    
+    [self.mapView addGestureRecognizer:self.tap];
+    
     self.pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
     self.pinch.delegate = self;
     self.pinch.cancelsTouchesInView = YES;
@@ -55,6 +72,38 @@
     
     self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(userDidTapDone:)];
     self.cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(userDidTapCancel:)];
+}
+
+- (void)handleTap:(UITapGestureRecognizer *)tap {
+    if (tap.state == UIGestureRecognizerStateEnded) {
+        //NSLog(@"Long pressed");
+        
+        self.didDropPin = YES;
+        
+        CGPoint touchPoint = [tap locationInView:self.mapView];
+        CLLocationCoordinate2D locationOnMap = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
+        
+        MKPointAnnotation *annotation = [MKPointAnnotation new];
+        annotation.coordinate = locationOnMap;
+        self.editingAnnotation = annotation;
+        [self.mapView addAnnotation:annotation];
+        
+        MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(locationOnMap, 0.005131, 0.004123);
+        [self.mapView setRegion:region animated:YES];
+        
+        [self.mapView removeGestureRecognizer:self.longPress];
+        [self.mapView removeGestureRecognizer:self.tap];
+        
+        [self.mapView addGestureRecognizer:self.touch];
+        [self.mapView addGestureRecognizer:self.pinch];
+        [self.mapView addGestureRecognizer:self.doubleTap];
+        [self.mapView addGestureRecognizer:self.pan];
+        
+        [self.navBar.topItem setLeftBarButtonItem:self.cancelButton animated:YES];
+        [self.navBar.topItem setRightBarButtonItem:self.doneButton animated:YES];
+        
+        self.mapView.zoomEnabled = NO;
+    }
 }
 
 #pragma mark - UIGestureRecognizer handlers
@@ -240,6 +289,7 @@
     //self.annotation = nil;
     
     [self.mapView addGestureRecognizer:self.longPress];
+    [self.mapView addGestureRecognizer:self.tap];
     
     [self.mapView removeGestureRecognizer:self.pinch];
     [self.mapView removeGestureRecognizer:self.doubleTap];
