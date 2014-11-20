@@ -26,7 +26,6 @@
 
 @property (nonatomic) MKCoordinateRegion originalRegion;
 @property (strong, nonatomic) CLLocation *originalCenter;
-@property (nonatomic) BOOL cancelZoomMomentum;
 
 @property (strong, nonatomic) UIBarButtonItem *doneButton;
 @property (strong, nonatomic) UIBarButtonItem *cancelButton;
@@ -46,7 +45,6 @@
     self.pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
     self.pan.maximumNumberOfTouches = 1;
     self.pan.delegate = self;
-    [self.mapView addGestureRecognizer:self.pan];
     
     self.doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
     self.doubleTap.numberOfTapsRequired = 2;
@@ -54,50 +52,40 @@
     
     self.touch = [[TouchGestureRecognizer alloc] initWithTarget:self action:@selector(handleTouch:)];
     self.touch.delegate = self;
-    [self.mapView addGestureRecognizer:self.touch];
     
     self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(userDidTapDone:)];
     self.cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(userDidTapCancel:)];
 }
 
-- (void)userDidTapDone:(UIBarButtonItem *)button {
-    
-    NSLog(@"done");
-    if (self.originalCenter) {
-        NSLog(@"original center");
-        self.editingAnnotation.coordinate = self.originalCenter.coordinate;
-    }
-    else {
-        NSLog(@"nope");
-        self.editingAnnotation.coordinate = self.mapView.centerCoordinate;
-    }
-    
-    [self.mapView addAnnotation:self.editingAnnotation];
-    [self endEditing];
-}
-
-- (void)userDidTapCancel:(UIBarButtonItem *)button {
-    NSLog(@"cancel");
-    [self endEditing];
-}
-
-- (void)endEditing {
-    [self.navBar.topItem setLeftBarButtonItem:nil animated:YES];
-    [self.navBar.topItem setRightBarButtonItem:nil animated:YES];
-    [self.pinView removeFromSuperview];
-    self.pinView = nil;
-    //self.annotation = nil;
-    
-    [self.mapView removeGestureRecognizer:self.pinch];
-    [self.mapView removeGestureRecognizer:self.doubleTap];
-    [self.mapView addGestureRecognizer:self.longPress];
-    
-    self.mapView.zoomEnabled = YES;
-}
-
-- (void)handleTouch:(TouchGestureRecognizer *)touch {
-    if (touch.state == UIGestureRecognizerStateBegan) {
-        self.cancelZoomMomentum = YES;
+#pragma mark - UIGestureRecognizer handlers
+- (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        //NSLog(@"Long pressed");
+        
+        self.didDropPin = YES;
+        
+        CGPoint touchPoint = [longPress locationInView:self.mapView];
+        CLLocationCoordinate2D locationOnMap = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
+        
+        MKPointAnnotation *annotation = [MKPointAnnotation new];
+        annotation.coordinate = locationOnMap;
+        self.editingAnnotation = annotation;
+        [self.mapView addAnnotation:annotation];
+        
+        MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(locationOnMap, 0.005131, 0.004123);
+        [self.mapView setRegion:region animated:YES];
+        
+        [self.mapView removeGestureRecognizer:self.longPress];
+        
+        [self.mapView addGestureRecognizer:self.touch];
+        [self.mapView addGestureRecognizer:self.pinch];
+        [self.mapView addGestureRecognizer:self.doubleTap];
+        [self.mapView addGestureRecognizer:self.pan];
+        
+        [self.navBar.topItem setLeftBarButtonItem:self.cancelButton animated:YES];
+        [self.navBar.topItem setRightBarButtonItem:self.doneButton animated:YES];
+        
+        self.mapView.zoomEnabled = NO;
     }
 }
 
@@ -106,8 +94,7 @@
     
     if (doubleTap.state == UIGestureRecognizerStateEnded) {
         
-        self.cancelZoomMomentum = YES;
-        //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
+        [self cancelScrollingUpdate];
         
         float zoomMultiplier = 0.5;
         MKCoordinateSpan currentSpan = self.mapView.region.span;
@@ -127,29 +114,12 @@
 
 - (void)handlePinch:(UIPinchGestureRecognizer *)pinch {
     
-    //static MKCoordinateRegion originalRegion;
-    
-    if (pinch.state == UIGestureRecognizerStatePossible) {
-        //NSLog(@"pinch possible");
-    }
-    else if (pinch.state == UIGestureRecognizerStateBegan) {
-        NSLog(@"pinch began");
+    if (pinch.state == UIGestureRecognizerStateBegan) {
+        //NSLog(@"pinch began");
         
-        self.cancelZoomMomentum = YES;
-        //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
+        [self cancelScrollingUpdate];
         
         self.mapView.scrollEnabled = NO;
-        
-        /*
-        CGPoint oldPointInView = [self.mapView convertCoordinate:self.originalCenter.coordinate toPointToView:self.mapView];
-        CGPoint newPointInView = self.mapView.center;
-        CGFloat distance = hypotf(newPointInView.x - oldPointInView.x, newPointInView.y - oldPointInView.y);
-        
-        if (distance < 150 && self.originalCenter) {
-            NSLog(@"reset from pan");
-            self.mapView.centerCoordinate = self.originalCenter.coordinate;
-        }
-         */
         
         if (!self.originalCenter) {
             CLLocationCoordinate2D centerCoordinate = self.mapView.centerCoordinate;
@@ -157,18 +127,12 @@
         }
         
         self.originalRegion = self.mapView.region;
-        
-        //NSLog(@"old center: %f, %f", self.originalCenter.coordinate.latitude, self.originalCenter.coordinate.longitude);
     }
     else if (pinch.state == UIGestureRecognizerStateChanged) {
         //NSLog(@"pinch changed");
         
         double latdelta = self.originalRegion.span.latitudeDelta / pinch.scale;
         double londelta = self.originalRegion.span.longitudeDelta / pinch.scale;
-        
-        //NSLog(@"pinch scale: %f", pinch.scale);
-        
-        // TODO: set these constants to appropriate values to set max/min zoomscale
         latdelta = MAX(MIN(latdelta, 150), 0);
         londelta = MAX(MIN(londelta, 150), 0);
         MKCoordinateSpan span = MKCoordinateSpanMake(latdelta, londelta);
@@ -176,74 +140,32 @@
         [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
     }
     else if (pinch.state == UIGestureRecognizerStateCancelled) {
-        NSLog(@"pinch cancelled");
+        //NSLog(@"pinch cancelled");
+        self.mapView.scrollEnabled = YES;
     }
     else if (pinch.state == UIGestureRecognizerStateEnded) {
-        NSLog(@"pinch ended");
+        //NSLog(@"pinch ended");
         self.mapView.scrollEnabled = YES;
-        
-        //NSLog(@"new center: %f, %f", self.mapView.centerCoordinate.latitude, self.mapView.centerCoordinate.longitude);
-        
-        //NSLog(@"velocity: %f", pinch.velocity);
-        self.cancelZoomMomentum = NO;
         [self mapZoomUpdatesLoop];
-        
-        //self.originalCenter = nil;
-    }
-}
-
-- (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
-    if (longPress.state == UIGestureRecognizerStateEnded) {
-        NSLog(@"Long pressed");
-        
-        self.didDropPin = YES;
-        
-        CGPoint touchPoint = [longPress locationInView:self.mapView];
-        CLLocationCoordinate2D locationOnMap = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
-        
-        MKPointAnnotation *annotation = [MKPointAnnotation new];
-        annotation.coordinate = locationOnMap;
-        self.editingAnnotation = annotation;
-        [self.mapView addAnnotation:annotation];
-        
-        MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(locationOnMap, 0.005131, 0.004123);
-        [self.mapView setRegion:region animated:YES];
-        
-        [self.mapView removeGestureRecognizer:self.longPress];
-        //[self.mapView addGestureRecognizer:self.touch];
-        [self.mapView addGestureRecognizer:self.pinch];
-        //[self.mapView addGestureRecognizer:self.pan];
-        [self.mapView addGestureRecognizer:self.doubleTap];
-        
-        [self.navBar.topItem setLeftBarButtonItem:self.cancelButton animated:YES];
-        [self.navBar.topItem setRightBarButtonItem:self.doneButton animated:YES];
-        
-        self.mapView.zoomEnabled = NO;
     }
 }
 
 - (void)handlePan:(UIPanGestureRecognizer *)pan {
     
-    if (pan.state == UIGestureRecognizerStatePossible) {
-        //NSLog(@"pan possible");
-    }
-    else if (pan.state == UIGestureRecognizerStateBegan) {
-        NSLog(@"pan began");
+    if (pan.state == UIGestureRecognizerStateBegan) {
+        //NSLog(@"pan began");
         self.originalCenter = nil;
-        self.cancelZoomMomentum = YES;
-        //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
-    }
-    else if (pan.state == UIGestureRecognizerStateChanged) {
-        //NSLog(@"num touches = %lu", (unsigned long)pan.numberOfTouches);
-    }
-    else if (pan.state == UIGestureRecognizerStateCancelled) {
-        //NSLog(@"pan cancelled");
-    }
-    else if (pan.state == UIGestureRecognizerStateEnded) {
-        NSLog(@"pan ended");
+        [self cancelScrollingUpdate];
     }
 }
 
+- (void)handleTouch:(TouchGestureRecognizer *)touch {
+    if (touch.state == UIGestureRecognizerStateBegan) {
+        [self cancelScrollingUpdate];
+    }
+}
+
+#pragma mark - UIMapViewDelegate Methods
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
     MKPinAnnotationView *pin = (MKPinAnnotationView *) [self.mapView dequeueReusableAnnotationViewWithIdentifier: @"destinationPin"];
     if (pin == nil) {
@@ -283,24 +205,57 @@
     }
 }
 
+#pragma mark - UIGestureRecognizerDelegate Methods
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     
     return YES;
 }
 
+#pragma mark - Button Handlers
+- (void)userDidTapDone:(UIBarButtonItem *)button {
+    
+    NSLog(@"done");
+    if (self.originalCenter) {
+        self.editingAnnotation.coordinate = self.originalCenter.coordinate;
+    }
+    else {
+        self.editingAnnotation.coordinate = self.mapView.centerCoordinate;
+    }
+    
+    [self.mapView addAnnotation:self.editingAnnotation];
+    [self endEditing];
+}
+
+- (void)userDidTapCancel:(UIBarButtonItem *)button {
+    NSLog(@"cancel");
+    [self endEditing];
+}
+
+#pragma mark - helper methods
+- (void)endEditing {
+    [self.navBar.topItem setLeftBarButtonItem:nil animated:YES];
+    [self.navBar.topItem setRightBarButtonItem:nil animated:YES];
+    [self.pinView removeFromSuperview];
+    self.pinView = nil;
+    //self.annotation = nil;
+    
+    [self.mapView addGestureRecognizer:self.longPress];
+    
+    [self.mapView removeGestureRecognizer:self.pinch];
+    [self.mapView removeGestureRecognizer:self.doubleTap];
+    [self.mapView removeGestureRecognizer:self.touch];
+    [self.mapView removeGestureRecognizer:self.pan];
+    
+    self.mapView.zoomEnabled = YES;
+}
+
 static float velocityDecay = 0.9;
 static float otherVelocityDecay = 0.75;
+static float maxVelocity = 8;
 static float pinchScale;
 static float currentVelocity;
 static NSDate *lastRun;
-static float maxVelocity = 8;
 - (void)mapZoomUpdatesLoop {
-    
-    if (self.cancelZoomMomentum) {
-        lastRun = nil;
-        self.cancelZoomMomentum = NO;
-        return;
-    }
     
     if (!lastRun) {
         lastRun = [NSDate date];
@@ -314,27 +269,13 @@ static float maxVelocity = 8;
     currentVelocity *= decay;
     pinchScale = currentVelocity * timeSinceLastRun;
     
-    //NSLog(@"currentVelocity: %f", currentVelocity);
-    
-    //double latitudeDelta = self.originalRegion.span.latitudeDelta / pinchScale;
-    //double longitudeDelta = self.originalRegion.span.longitudeDelta / pinchScale;
-    
     double latitudeDelta = self.mapView.region.span.latitudeDelta * (1 - pinchScale);
     double longitudeDelta = self.mapView.region.span.longitudeDelta * (1 - pinchScale);
-    
-    
-    //NSLog(@"%f,%f", self.mapView.region.span.latitudeDelta, pinchScale);
-    
-    //NSLog(@"%f, %f", latitudeDelta, longitudeDelta);
-    
-    // TODO: set these constants to appropriate values to set max/min zoomscale
     float minDelta = 0.003432;
     float maxDelta = 150;
     latitudeDelta = MAX(MIN(latitudeDelta, maxDelta), minDelta);
     longitudeDelta = MAX(MIN(longitudeDelta, maxDelta), minDelta);
     MKCoordinateSpan span = MKCoordinateSpanMake(latitudeDelta, longitudeDelta);
-    
-    //NSLog(@"%f, %f", latitudeDelta, longitudeDelta);
     
     [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
     
@@ -347,6 +288,11 @@ static float maxVelocity = 8;
         //NSLog(@"Zoom over.");
         lastRun = nil;
     }
+}
+
+- (void)cancelScrollingUpdate {
+    lastRun = nil;
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
 }
 
 @end
