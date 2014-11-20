@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
+#import "GoogleDirectionsRoute.h"
+
 @interface GoogleDirectionsRequest : NSObject
 
 - (id)initWithAPIKey:(NSString *)apiKey;
