@@ -39,4 +39,24 @@
     return self;
 }
 
+- (MKPolyline *)polyline {
+    
+    int totalPoints = 0;
+    
+    for (GoogleDirectionsStep *step in self.steps) {
+        totalPoints += step.polyline.pointCount;
+    }
+    
+    MKMapPoint points[totalPoints];
+    int currentIndex = 0;
+    for (GoogleDirectionsStep *step in self.steps) {
+        for (int i = 0; i < step.polyline.pointCount; i++) {
+            points[currentIndex] = step.polyline.points[i];
+            currentIndex++;
+        }
+    }
+    
+    return [MKPolyline polylineWithPoints:points count:totalPoints];
+}
+
 @end

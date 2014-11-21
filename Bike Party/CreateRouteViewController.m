@@ -8,6 +8,7 @@
 
 #import "CreateRouteViewController.h"
 #import "GoogleDirectionsRequest.h"
+#import "GoogleDirectionsLeg.h"
 
 @interface CreateRouteViewController ()
 
@@ -33,11 +34,39 @@
     [self refreshNavBar];
 }
 
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectPolyline:(id<NSCopying>)polylineIdentifier atCoordinate:(CLLocationCoordinate2D)coordinate {
+    NSLog(@"selected polyline: %@", polylineIdentifier);
+    
+    NSNumber *identifier = (NSNumber *)polylineIdentifier;
+    NSInteger index = identifier.integerValue + 1;
+    
+    Waypoint *waypoint = [[Waypoint alloc] initWithCoordinate:coordinate];
+    [self.editRouteMap insertWaypoint:waypoint atIndex:index];
+}
+
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didUpdateEditingWaypoint:(Waypoint *)waypoint {
+    
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(refreshRoute) object:nil];
+    [self performSelector:@selector(refreshRoute) withObject:nil afterDelay:1];
+    
+}
+
 - (void)userDidTapDone:(UIBarButtonItem *)button {
     [self.editRouteMap confirmEdits];
     [self refreshNavBar];
+    [self refreshRoute];
+}
+
+- (void)userDidTapCancel:(UIBarButtonItem *)button {
+    [self.editRouteMap cancelEdits];
+    [self refreshNavBar];
+    [self refreshRoute];
+}
+
+- (void)refreshRoute {
     
     if (self.editRouteMap.waypoints.count > 1) {
+        
         NSMutableArray *locations = [NSMutableArray new];
         for (Waypoint *waypoint in self.editRouteMap.waypoints) {
             CLLocationCoordinate2D coordinate = waypoint.coordinate;
@@ -53,16 +82,22 @@
             }
         }];
     }
-}
-
-- (void)userDidTapCancel:(UIBarButtonItem *)button {
-    [self.editRouteMap cancelEdits];
-    [self refreshNavBar];
+    else {
+        [self.editRouteMap removePolylineWithIdentifier:[NSNumber numberWithInt:0]];
+    }
+    
 }
 
 - (void)drawRoute {
-    [self.editRouteMap addPolyline:self.route.overviewPolyline withIdentifier:@"routePolyline"];
-    [self.editRouteMap showPolylineWithIdentifier:@"routePolyline" edgePadding:20 animated:YES];
+    
+    int count = 0;
+    for (GoogleDirectionsLeg *leg in self.route.legs) {
+        
+        NSNumber *identifier = [NSNumber numberWithInt:count];
+        [self.editRouteMap addPolyline:leg.polyline withIdentifier:identifier];
+        
+        count++;
+    }
 }
 
 - (void)refreshNavBar {

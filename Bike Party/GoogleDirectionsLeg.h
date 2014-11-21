@@ -23,5 +23,6 @@
 @property (nonatomic, readonly) CLLocation *startLocation;
 @property (nonatomic, readonly) CLLocation *endLocation;
 @property (nonatomic, readonly) NSArray *steps;
+@property (nonatomic, readonly) MKPolyline *polyline;
 
 @end
