@@ -37,7 +37,7 @@ typedef enum {
 
 - (void)addPolyline:(MKPolyline *)polyline withIdentifier:(NSString *)identifier;
 - (void)removePolylineWithIdentifier:(NSString *)identifier;
-- (void)showPolylineWithIdentifier:(NSString *)identifier animated:(BOOL)animated;
+- (void)showPolylineWithIdentifier:(NSString *)identifier edgePadding:(CGFloat)edgeInsets animated:(BOOL)animated;
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation;
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated;

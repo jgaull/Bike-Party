@@ -62,6 +62,7 @@
 
 - (void)drawRoute {
     [self.editRouteMap addPolyline:self.route.overviewPolyline withIdentifier:@"routePolyline"];
+    [self.editRouteMap showPolylineWithIdentifier:@"routePolyline" edgePadding:20 animated:YES];
 }
 
 - (void)refreshNavBar {

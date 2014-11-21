@@ -77,16 +77,14 @@
     }
 }
 
-- (void)showPolylineWithIdentifier:(NSString *)identifier animated:(BOOL)animated {
-    /*
-    if (self.state != kViewControllerStateEditing) {
-        MKCoordinateSpan span = route.bounds.span;
-        MKCoordinateSpan paddedSpan = MKCoordinateSpanMake(span.latitudeDelta + EDGE_PAD, span.longitudeDelta + EDGE_PAD);
-        MKCoordinateRegion paddedRegion = MKCoordinateRegionMake(route.bounds.center, paddedSpan);
-        
-        [self.mapView setRegion:paddedRegion animated:YES];
+- (void)showPolylineWithIdentifier:(NSString *)identifier edgePadding:(CGFloat)edgeInsets animated:(BOOL)animated {
+    
+    MKPolyline *polyline = [self.polylines objectForKey:identifier];
+    if (polyline) {
+        MKMapRect mapRect = polyline.boundingMapRect;
+        UIEdgeInsets padding = UIEdgeInsetsMake(edgeInsets, edgeInsets, edgeInsets, edgeInsets);
+        [self.mapView setVisibleMapRect:mapRect edgePadding:padding animated:animated];
     }
-     */
 }
 
 #pragma mark - UIViewController overrides
@@ -150,8 +148,128 @@
 
 - (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
     if (longPress.state == UIGestureRecognizerStateBegan) {
-        [self beginEditingWithGesture:longPress];
+        
+        CGPoint touchPoint = [longPress locationInView:self.mapView];
+        
+        for (NSString *key in self.polylines) {
+            MKPolyline *polyline = [self.polylines objectForKey:key];
+            
+            for (int i = 0; i < polyline.pointCount - 1; i++) {
+                MKMapPoint mapPoint1 = polyline.points[i];
+                MKMapPoint mapPoint2 = polyline.points[i + 1];
+                
+                CGPoint point1 = [self convertMapPointToPoint:mapPoint1];
+                CGPoint point2 = [self convertMapPointToPoint:mapPoint2];
+                
+                BOOL intersection = [self testSegmentWithStartPoint:point1 endPoint:point2 forIntersectionWithCircleAtPoint:touchPoint withRadius:15];
+                if (intersection) {
+                    NSLog(@"intersect!");
+                    
+                    [self beginEditingWithGesture:longPress];
+                    break;
+                }
+            }
+        }
+        
+        NSLog(@"-----------");
+        
+        //[self beginEditingWithGesture:longPress];
+        
+        /*
+         //Unit test this bad boy.
+         CGPoint point1 = CGPointMake(129.94014059437251, 14.406687876805409);
+         CGPoint point2 = CGPointMake(154.11791754429751, 346.77986183622789);
+         CGPoint circleCenter = CGPointMake(130.5, 218);
+         double radius = 50;
+        
+         //CGPoint point1 = CGPointMake(0, 0);
+         //CGPoint point2 = CGPointMake(5, 10);
+         //CGPoint circleCenter = CGPointMake(1, 3);
+         //double radius = 1;
+         BOOL intersection = [self testSegmentWithStartPoint:point1 endPoint:point2 forIntersectionWithCircleAtPoint:circleCenter withRadius:radius];
+         NSLog(@"intersection? %d", intersection);
+         */
     }
+}
+
+- (CGPoint)convertMapPointToPoint:(MKMapPoint)mapPoint {
+    CLLocationCoordinate2D coordinate = MKCoordinateForMapPoint(mapPoint);
+    return [self.mapView convertCoordinate:coordinate toPointToView:self.mapView];
+}
+
+- (BOOL)testSegmentWithStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint forIntersectionWithCircleAtPoint:(CGPoint)circleCenter withRadius:(double)radius {
+    
+    //If the line is vertical
+    if (startPoint.x == endPoint.x) {
+        
+        double distance = ABS(startPoint.x - circleCenter.x);
+        if (distance <= radius) {
+            return YES;
+        }
+    }
+    
+    //The line is horizontal
+    if (startPoint.y == endPoint.y) {
+        
+        double distance = ABS(startPoint.y - circleCenter.y);
+        if (distance <= radius) {
+            return YES;
+        }
+    }
+    
+    //Check to see if either of the end points of this segment are within the circle
+    double distanceFromStartPoint = [self distanceBetweenPoint:startPoint andPoint:circleCenter];
+    double distanceFromEndPoint = [self distanceBetweenPoint:endPoint andPoint:circleCenter];
+    
+    if (distanceFromStartPoint <= radius || distanceFromEndPoint <= radius) {
+        //The circle contains either the start or end point
+        return YES;
+    }
+    
+    //Cover the other cases with some trig
+    double run = endPoint.x - startPoint.x;
+    double rise = endPoint.y - startPoint.y;
+    double slope = rise / run;
+    double yIntercept = startPoint.y - slope * startPoint.x;
+    
+    //y = m * x + b
+    double y = circleCenter.y;
+    double x = (y - yIntercept) / slope;
+    CGPoint newPoint = CGPointMake(x, y);
+    
+    double lengthOfLine = circleCenter.x - newPoint.x;
+    double angle = ABS(atan(slope) * (180 / M_PI));
+    
+    //NSLog(@"angle = %f, sin(angle) = %f", angle, sin(angle));
+    double distance = lengthOfLine * sin(angle);
+    
+    if (ABS(distance) <= radius) {
+        double intersectionX = circleCenter.x + distance * ABS(sin(angle));
+        double intersectionY = circleCenter.y + distance * ABS(cos(angle));
+        CGPoint intersectionPoint = CGPointMake(intersectionX, intersectionY);
+        CGPoint bottomLeft = CGPointMake(MIN(startPoint.x, endPoint.x), MIN(startPoint.y, endPoint.y));
+        CGPoint topRight = CGPointMake(MAX(startPoint.x, endPoint.x), MAX(startPoint.y, endPoint.y));
+        CGRect lineSegmentBoundingBox = CGRectMake(bottomLeft.x, bottomLeft.y, topRight.x - bottomLeft.x, topRight.y - bottomLeft.y);
+        
+        if (CGRectContainsPoint(lineSegmentBoundingBox, intersectionPoint)) {
+            NSLog(@"distance: %f", distance);
+            return YES;
+        }
+        else {
+            NSLog(@"flail: %f", distance);
+        }
+    }
+    else {
+        NSLog(@"failure distance: %f", distance);
+    }
+    
+    //None of those methods worked?! I guess we'll have to accept defeat.
+    //No amount of math can prove that this segment intercects the circle.
+    return NO;
+}
+
+- (double)distanceBetweenPoint:(CGPoint)point1 andPoint:(CGPoint)point2 {
+    return ABS(hypot((point1.x - point2.x), (point1.y - point2.y)));
 }
 
 - (void)handleDoubleTap:(UITapGestureRecognizer *)doubleTap {
