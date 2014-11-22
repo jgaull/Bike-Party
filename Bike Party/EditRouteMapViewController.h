@@ -14,7 +14,7 @@
 
 typedef enum {
     EditRouteMapViewControllerStateIdle,
-    EditRouteMapViewControllerStateEditing
+    EditRouteMapViewControllerStateEditingWaypoint
 }EditRouteMapViewControllerState;
 
 @class EditRouteMapViewController;
@@ -25,6 +25,9 @@ typedef enum {
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didUpdateEditingWaypoint:(Waypoint *)waypoint;
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didEndEditingWaypoint:(Waypoint *)waypoint;
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectPolyline:(id <NSCopying>)polylineIdentifier atCoordinate:(CLLocationCoordinate2D)coordinate;
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectCoordinate:(CLLocationCoordinate2D)coordinate;
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectWaypoint:(Waypoint *)waypoint;
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didDeselectWaypoint:(Waypoint *)waypoint;
 
 @end
 
@@ -33,6 +36,8 @@ typedef enum {
 @property (weak, nonatomic) NSObject <EditRouteMapViewControllerDelegate> *delegate;
 @property (readonly, nonatomic) EditRouteMapViewControllerState state;
 @property (readonly, nonatomic) NSArray *waypoints;
+@property (readonly, nonatomic) Waypoint *editingWaypoint;
+@property (readonly, nonatomic) Waypoint *selectedWaypoint;
 
 - (void)confirmEdits;
 - (void)cancelEdits;
@@ -44,11 +49,14 @@ typedef enum {
 
 - (void)addWaypoint:(Waypoint *)waypoint;
 - (void)insertWaypoint:(Waypoint *)waypoint atIndex:(NSUInteger)index;
+- (void)removeWaypoint:(Waypoint *)waypoint;
+- (void)beginEditingWaypoint:(Waypoint *)waypoint;
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation;
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated;
-//- (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated;
 - (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay;
+//- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view;
+//- (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view;
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer;
 

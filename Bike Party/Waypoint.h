@@ -8,13 +8,23 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <MapKit/MapKit.h>
 
-@interface Waypoint : NSObject
+typedef enum {
+    WaypointTypeDestination,
+    WaypointTypeTurn,
+    WaypointTypeViaPoint
+} WaypointType;
+
+@interface Waypoint : NSObject <MKAnnotation>
 
 @property (nonatomic) CLLocationCoordinate2D coordinate;
-@property (strong, nonatomic) NSString *name;
+@property (nonatomic, readonly, copy) NSString *title;
+@property (nonatomic, readonly, copy) NSString *subtitle;
 
-- (id)initWithCoordinate:(CLLocationCoordinate2D)coordinate;
-- (id)initWithCoordinate:(CLLocationCoordinate2D)coordinate andName:(NSString *)name;
+@property (nonatomic, readonly) WaypointType type;
+
+- (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate;
+- (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate title:(NSString *)name;
 
 @end

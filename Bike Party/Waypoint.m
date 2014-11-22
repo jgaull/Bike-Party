@@ -10,19 +10,22 @@
 
 @implementation Waypoint
 
-- (id)initWithCoordinate:(CLLocationCoordinate2D)coordinate andName:(NSString *)name {
+- (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate {
+    
     self = [super self];
     if (self) {
-        self.coordinate = coordinate;
-        self.name = name;
+        _coordinate = coordinate;
+        _type = type;
     }
     return self;
 }
 
-- (id)initWithCoordinate:(CLLocationCoordinate2D)coordinate {
-    self = [super self];
+- (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate title:(NSString *)name {
+    self = [super init];
     if (self) {
-        self.coordinate = coordinate;
+        _type = type;
+        _title = name;
+        _coordinate = coordinate;
     }
     return self;
 }

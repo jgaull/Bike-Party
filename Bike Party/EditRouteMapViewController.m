@@ -13,9 +13,8 @@
 
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 
-@property (nonatomic) Waypoint *editingWaypoint;
 @property (strong, nonatomic) MKPinAnnotationView *pinView;
-@property (strong, nonatomic) MKPointAnnotation *pinDropAnnotation;
+@property (strong, nonatomic) NSObject <MKAnnotation> *pinDropAnnotation;
 
 @property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
 @property (strong, nonatomic) UITapGestureRecognizer *tap;
@@ -44,12 +43,7 @@
         coordinate = self.mapView.centerCoordinate;
     }
     
-    MKPointAnnotation *annotation = [MKPointAnnotation new];
-    annotation.coordinate = coordinate;
-    [self.mapView addAnnotation:annotation];
-    
-    //Waypoint *waypoint = [[Waypoint alloc] initWithCoordinate:coordinate andName:nil];
-    //[self.mutableWaypoints addObject:waypoint];
+    [self.mapView addAnnotation:self.editingWaypoint];
     
     [self endEditing];
 }
@@ -117,6 +111,46 @@
     [self beginEditingWaypoint:waypoint];
 }
 
+- (void)removeWaypoint:(Waypoint *)waypoint {
+    [self.mapView removeAnnotation:waypoint];
+    [self.mutableWaypoints removeObject:waypoint];
+    
+    if (waypoint == self.selectedWaypoint) {
+        [self deselectSelectedWaypoint];
+    }
+}
+
+- (void)beginEditingWaypoint:(Waypoint *)waypoint {
+    
+    //When the pin and map are centered we use this
+    _editingWaypoint = waypoint;
+    
+    //Create an annotation to add a pin to the map
+    self.pinDropAnnotation = waypoint;
+    [self.mapView addAnnotation:waypoint];
+    
+    CLLocationCoordinate2D coordinate = waypoint.coordinate;
+    MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coordinate, 0.005131, 0.004123);
+    [self.mapView setRegion:region animated:YES];
+    
+    [self.mapView removeGestureRecognizer:self.longPress];
+    [self.mapView removeGestureRecognizer:self.tap];
+    
+    [self.mapView addGestureRecognizer:self.touch];
+    [self.mapView addGestureRecognizer:self.pinch];
+    [self.mapView addGestureRecognizer:self.doubleTap];
+    [self.mapView addGestureRecognizer:self.pan];
+    
+    self.mapView.zoomEnabled = NO;
+    
+    _state = EditRouteMapViewControllerStateEditingWaypoint;
+    
+    if ([self.delegate respondsToSelector:@selector(editRouteMap:didBeginEditingWaypoint:)]) {
+#warning Waypoint parameter should not be nil
+        [self.delegate editRouteMap:self didBeginEditingWaypoint:nil];
+    }
+}
+
 #pragma mark - UIViewController overrides
 - (void)viewDidLoad {
     
@@ -131,7 +165,7 @@
     
     //The default double tap behavior (zoom the map in) conflicts with our single tap.
     //We fix this problem by finding the double tap gesture recognizer and requiring
-    //The single tap to fail in the event of a double tap
+    //the single tap to fail in the event of a double tap.
     for (UIView *view in self.mapView.subviews) {
         for (UIGestureRecognizer *gesture in view.gestureRecognizers) {
             if ([gesture isKindOfClass:[UITapGestureRecognizer class]]) {
@@ -173,10 +207,48 @@
 - (void)handleTap:(UITapGestureRecognizer *)tap {
     if (tap.state == UIGestureRecognizerStateEnded) {
         
-        CGPoint touchPoint = [tap locationInView:self.mapView];
-        CLLocationCoordinate2D coordinate = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
-        Waypoint *waypoint = [[Waypoint alloc] initWithCoordinate:coordinate];
-        [self addWaypoint:waypoint];
+        CGPoint tapPoint = [tap locationInView:self.mapView];
+        
+        if (self.selectedWaypoint) {
+            MKAnnotationView *annotationView = [self.mapView viewForAnnotation:self.selectedWaypoint];
+            [annotationView setSelected:NO animated:YES];
+            
+            Waypoint *waypoint = self.selectedWaypoint;
+            _selectedWaypoint = nil;
+            
+            if ([self.delegate respondsToSelector:@selector(editRouteMap:didDeselectWaypoint:)]) {
+                
+                [self.delegate editRouteMap:self didDeselectWaypoint:waypoint];
+            }
+            
+            return;
+        }
+        
+        for (Waypoint *waypoint in self.mapView.annotations) {
+            
+            MKAnnotationView *annotationView = [self.mapView viewForAnnotation:waypoint];
+            CGRect frame = annotationView.frame;
+            
+            if (CGRectContainsPoint(frame, tapPoint)) {
+                
+                _selectedWaypoint = waypoint;
+                [annotationView setSelected:YES animated:YES];
+                
+                if ([self.delegate respondsToSelector:@selector(editRouteMap:didSelectWaypoint:)]) {
+                    [self.delegate editRouteMap:self didSelectWaypoint:waypoint];
+                }
+                
+                return;
+            }
+        }
+        
+        if ([self.delegate respondsToSelector:@selector(editRouteMap:didSelectCoordinate:)]) {
+            
+            CGPoint touchPoint = [tap locationInView:self.mapView];
+            CLLocationCoordinate2D coordinate = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
+            
+            [self.delegate editRouteMap:self didSelectCoordinate:coordinate];
+        }
         
     }
 }
@@ -212,9 +284,11 @@
             }
         }
         
-        CLLocationCoordinate2D coordinate = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
-        Waypoint *waypoint = [[Waypoint alloc] initWithCoordinate:coordinate];
-        [self addWaypoint:waypoint];
+        if ([self.delegate respondsToSelector:@selector(editRouteMap:didSelectCoordinate:)]) {
+            
+            CLLocationCoordinate2D coordinate = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
+            [self.delegate editRouteMap:self didSelectCoordinate:coordinate];
+        }
     }
 }
 
@@ -299,13 +373,13 @@
     MKPinAnnotationView *pin = (MKPinAnnotationView *) [self.mapView dequeueReusableAnnotationViewWithIdentifier: @"destinationPin"];
     if (pin == nil) {
         pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: @"destinationPin"];
-        UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeContactAdd];
-        UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        //UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeContactAdd];
+        //UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
         
         pin.animatesDrop = YES;
         pin.canShowCallout = YES;
-        pin.rightCalloutAccessoryView = rightButton;
-        pin.leftCalloutAccessoryView = leftButton;
+        //pin.rightCalloutAccessoryView = rightButton;
+        //pin.leftCalloutAccessoryView = leftButton;
         //pin.draggable = YES;
         
     } else {
@@ -315,8 +389,44 @@
     return pin;
 }
 
+/*
+- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
+    NSLog(@"annotation selected");
+    
+    if ([self.delegate respondsToSelector:@selector(editRouteMap:didSelectWaypoint:)]) {
+        Waypoint *waypoint = [self waypointForAnnotationView:view];
+        [self.delegate editRouteMap:self didSelectWaypoint:waypoint];
+    }
+}
+
+- (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view {
+    NSLog(@"annotation deselected");
+    
+    if ([self.delegate respondsToSelector:@selector(editRouteMap:didDeselectWaypoint:)]) {
+        Waypoint *waypoint = [self waypointForAnnotationView:view];
+        [self.delegate editRouteMap:self didDeselectWaypoint:waypoint];
+    }
+}
+ */
+
+/*
+- (Waypoint *)waypointForAnnotationView:(MKAnnotationView *)view {
+    for (Waypoint *waypoint in self.waypoints) {
+        
+        CLLocationCoordinate2D coordinate1 = waypoint.coordinate;
+        CLLocationCoordinate2D coordinate2 = view.annotation.coordinate;
+        if (coordinate1.latitude == coordinate2.latitude && coordinate1.longitude == coordinate2.longitude) {
+            return waypoint;
+        }
+    }
+    
+    return nil;
+}
+ */
+
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
     if (self.pinDropAnnotation) {
+        
         MKPinAnnotationView *mapPin = [[MKPinAnnotationView alloc] initWithAnnotation:self.pinDropAnnotation reuseIdentifier:@"testPin"];
 
         CGSize pinSize = mapPin.frame.size;
@@ -356,47 +466,25 @@
 }
 
 #pragma mark - helper methods
-- (void)beginEditingWaypoint:(Waypoint *)waypoint {
+- (void)deselectSelectedWaypoint {
     
-    //When the pin and map are centered we use this
-    self.editingWaypoint = waypoint;
+    MKAnnotationView *annotationView = [self.mapView viewForAnnotation:self.selectedWaypoint];
+    [annotationView setSelected:NO animated:YES];
     
-    CLLocationCoordinate2D coordinate = waypoint.coordinate;
+    Waypoint *waypoint = self.selectedWaypoint;
+    _selectedWaypoint = nil;
     
-    //Create an annotation to add a pin to the map
-    MKPointAnnotation *annotation = [MKPointAnnotation new];
-    annotation.coordinate = coordinate;
-    self.pinDropAnnotation = annotation;
-    [self.mapView addAnnotation:annotation];
-    
-    MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coordinate, 0.005131, 0.004123);
-    [self.mapView setRegion:region animated:YES];
-    
-    [self.mapView removeGestureRecognizer:self.longPress];
-    [self.mapView removeGestureRecognizer:self.tap];
-    
-    [self.mapView addGestureRecognizer:self.touch];
-    [self.mapView addGestureRecognizer:self.pinch];
-    [self.mapView addGestureRecognizer:self.doubleTap];
-    [self.mapView addGestureRecognizer:self.pan];
-    
-    self.mapView.zoomEnabled = NO;
-    
-    _state = EditRouteMapViewControllerStateEditing;
-    
-    if ([self.delegate respondsToSelector:@selector(editRouteMap:didBeginEditingWaypoint:)]) {
-#warning Waypoint parameter should not be nil
-        [self.delegate editRouteMap:self didBeginEditingWaypoint:nil];
+    if ([self.delegate respondsToSelector:@selector(editRouteMap:didDeselectWaypoint:)]) {
+        
+        [self.delegate editRouteMap:self didDeselectWaypoint:waypoint];
     }
 }
 
-
 - (void)endEditing {
-    self.editingWaypoint = nil;
+    _editingWaypoint = nil;
     
     [self.pinView removeFromSuperview];
     self.pinView = nil;
-    //self.annotation = nil;
     
     [self.mapView addGestureRecognizer:self.longPress];
     [self.mapView addGestureRecognizer:self.tap];
