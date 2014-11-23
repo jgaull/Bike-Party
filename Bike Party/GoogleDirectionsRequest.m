@@ -60,6 +60,7 @@
     }
     else {
         NSLog(@"something isn't set");
+        NSLog(@"path.count: %lu", (unsigned long)path.count);
     }
 }
 

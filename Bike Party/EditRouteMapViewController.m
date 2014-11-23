@@ -73,6 +73,18 @@
     }
 }
 
+- (void)removeAllPolylines {
+    
+    NSMutableArray *polylines = [NSMutableArray new];
+    for (id <NSCopying> key in self.polylines) {
+        MKPolyline *polyline = [self.polylines objectForKey:key];
+        [polylines addObject:polyline];
+    }
+    
+    [self.mapView removeOverlays:polylines];
+    self.polylines = nil;
+}
+
 - (void)showPolylineWithIdentifier:(id <NSCopying>)identifier edgePadding:(CGFloat)edgeInsets animated:(BOOL)animated {
     
     MKPolyline *polyline = [self.polylines objectForKey:identifier];
@@ -111,6 +123,11 @@
     [self.mapView addAnnotation:waypoint];
 }
 
+- (void)addWaypoints:(NSArray *)waypoints {
+    [self.mutableWaypoints addObjectsFromArray:waypoints];
+    [self.mapView addAnnotations:waypoints];
+}
+
 - (void)removeWaypoint:(Waypoint *)waypoint {
     [self.mapView removeAnnotation:waypoint];
     [self.mutableWaypoints removeObject:waypoint];
@@ -118,6 +135,16 @@
     if (waypoint == self.selectedWaypoint) {
         [self deselectSelectedWaypoint];
     }
+}
+
+- (void)removeWaypoints:(NSArray *)waypoints {
+    [self.mapView removeAnnotations:waypoints];
+    [self.mutableWaypoints removeObjectsInArray:waypoints];
+}
+
+- (void)removeAllWaypoints {
+    [self.mapView removeAnnotations:self.waypoints];
+    self.mutableWaypoints = nil;
 }
 
 - (void)beginEditingWaypoint:(Waypoint *)waypoint {
@@ -144,7 +171,7 @@
     
     if ([self.delegate respondsToSelector:@selector(editRouteMap:didBeginEditingWaypoint:)]) {
 #warning Waypoint parameter should not be nil
-        [self.delegate editRouteMap:self didBeginEditingWaypoint:nil];
+        [self.delegate editRouteMap:self didBeginEditingWaypoint:waypoint];
     }
 }
 

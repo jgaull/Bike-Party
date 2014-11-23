@@ -44,12 +44,16 @@ typedef enum {
 
 - (void)addPolyline:(MKPolyline *)polyline withIdentifier:(id <NSCopying>)identifier;
 - (void)removePolylineWithIdentifier:(id <NSCopying>)identifier;
+- (void)removeAllPolylines;
 - (void)showPolylineWithIdentifier:(id <NSCopying>)identifier edgePadding:(CGFloat)edgeInsets animated:(BOOL)animated;
 - (void)showPolylinesWithIdentifiers:(NSArray *)identifiers edgePadding:(CGFloat)edgeInsets animated:(BOOL)animated;
 
 - (void)addWaypoint:(Waypoint *)waypoint;
+- (void)addWaypoints:(NSArray *)waypoints;
 - (void)insertWaypoint:(Waypoint *)waypoint atIndex:(NSUInteger)index;
 - (void)removeWaypoint:(Waypoint *)waypoint;
+- (void)removeWaypoints:(NSArray *)waypoints;
+- (void)removeAllWaypoints;
 - (void)beginEditingWaypoint:(Waypoint *)waypoint;
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation;

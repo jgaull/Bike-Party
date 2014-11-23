@@ -10,6 +10,8 @@
 #import <CoreLocation/CoreLocation.h>
 
 #import "GoogleDirectionsRoute.h"
+#import "GoogleDirectionsLeg.h"
+#import "GoogleDirectionsStep.h"
 
 @interface GoogleDirectionsRequest : NSObject
 

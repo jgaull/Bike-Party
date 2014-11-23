@@ -10,6 +10,7 @@
 #import "GoogleDirectionsRequest.h"
 #import "GoogleDirectionsLeg.h"
 #import "GoogleDirectionsStep.h"
+#import "Ride.h"
 
 @interface CreateRouteViewController ()
 
@@ -17,7 +18,9 @@
 @property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
 @property (weak, nonatomic) EditRouteMapViewController *map;
 
-@property (strong, nonatomic) GoogleDirectionsRoute *route;
+@property (nonatomic) NSInteger editingIndex;
+
+@property (strong, nonatomic) Ride *ride;
 
 @end
 
@@ -25,6 +28,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.ride = [Ride new];
     //[self performSelector:@selector(testicle) withObject:nil afterDelay:5];
 }
 
@@ -44,11 +49,24 @@
     }
 }
 
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didBeginEditingWaypoint:(CLLocation *)waypoint {
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didBeginEditingWaypoint:(Waypoint *)waypoint {
     NSLog(@"Begin editing!");
+    
+    self.editingIndex = [self.ride.waypoints indexOfObject:waypoint];
     [self refreshNavBar];
 }
 
+- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didUpdateEditingWaypoint:(Waypoint *)waypoint {
+    
+    Waypoint *editingWaypoint = [self.ride.waypoints objectAtIndex:self.editingIndex];
+    editingWaypoint.coordinate = waypoint.coordinate;
+    
+    //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(refreshRoute) object:nil];
+    //[self performSelector:@selector(refreshRoute) withObject:nil afterDelay:1];
+    
+}
+
+/*
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectPolyline:(id<NSCopying>)polylineIdentifier atCoordinate:(CLLocationCoordinate2D)coordinate {
     NSLog(@"selected polyline: %@", polylineIdentifier);
     
@@ -59,17 +77,11 @@
     [self.map insertWaypoint:waypoint atIndex:index];
     [self.map beginEditingWaypoint:waypoint];
 }
-
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didUpdateEditingWaypoint:(Waypoint *)waypoint {
-    
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(refreshRoute) object:nil];
-    [self performSelector:@selector(refreshRoute) withObject:nil afterDelay:1];
-    
-}
+ */
 
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectCoordinate:(CLLocationCoordinate2D)coordinate {
     
-    Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate title:nil];
+    Waypoint *waypoint = [self.ride addDestinationWithCoordinate:coordinate];
     [self.map addWaypoint:waypoint];
     [self.map beginEditingWaypoint:waypoint];
 }
@@ -77,13 +89,21 @@
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectWaypoint:(Waypoint *)waypoint {
     NSLog(@"waypoint selected");
     
-    UIBarButtonItem *trashButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(userDidTapDeleteWaypoint:)];
+    NSMutableArray *items = [NSMutableArray new];
     
-    UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEditWaypoint:)];
+    if (waypoint.type == WaypointTypeDestination) {
+        UIBarButtonItem *trashButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(userDidTapDeleteWaypoint:)];
+        [items addObject:trashButton];
+    }
     
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    [items addObject:flexibleSpace];
     
-    NSArray *items = @[trashButton, flexibleSpace, editButton];
+    if (waypoint.type == WaypointTypeDestination) {
+        UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEditWaypoint:)];
+        [items addObject:editButton];
+    }
+    
     [self.toolbar setItems:items animated:YES];
 }
 
@@ -94,13 +114,21 @@
 }
 
 - (void)userDidTapDone:(UIBarButtonItem *)button {
+    
+    NSLog(@"confirm edits");
+    
+    [self.ride replaceDestinationAtIndex:self.editingIndex withDestination:self.map.editingWaypoint];
+    
     [self.map confirmEdits];
     [self refreshNavBar];
     [self refreshRoute];
 }
 
 - (void)userDidTapCancel:(UIBarButtonItem *)button {
+    
+    [self.ride removeDestination:self.map.editingWaypoint];
     [self.map cancelEdits];
+    
     [self refreshNavBar];
     [self refreshRoute];
 }
@@ -111,6 +139,8 @@
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete?" message:@"Are you sure you would like to delete this waypoint?" preferredStyle:UIAlertControllerStyleAlert];
     
     UIAlertAction *confirm = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        
+        [self.ride removeDestination:self.map.selectedWaypoint];
         [self.map removeWaypoint:self.map.selectedWaypoint];
         [self refreshRoute];
     }];
@@ -125,70 +155,68 @@
 - (void)userDidTapEditWaypoint:(UIBarButtonItem *)button {
     NSLog(@"Edit");
     
-    if (self.map.selectedWaypoint.type == WaypointTypeDestination) {
-        [self.map beginEditingWaypoint:self.map.selectedWaypoint];
+    Waypoint *waypoint = self.map.selectedWaypoint;
+    if (waypoint.type == WaypointTypeDestination) {
+        [self.map beginEditingWaypoint:waypoint];
+    }
+    else if (waypoint.type == WaypointTypeTurn) {
+        
+        /*
+        NSInteger totalSteps = 0;
+        for (GoogleDirectionsLeg *leg in self.route.legs) {
+            for (GoogleDirectionsStep *step in leg.steps) {
+                
+                totalSteps += leg.steps.count;
+                BOOL foundWaypoint = NO;
+                CLLocationCoordinate2D stepCoordinate = step.startLocation.coordinate;
+                CLLocationCoordinate2D waypointCoordinate = waypoint.coordinate;
+                if (stepCoordinate.latitude == waypointCoordinate.latitude && stepCoordinate.longitude == waypointCoordinate.longitude) {
+                    foundWaypoint = YES;
+                    break;
+                }
+                
+                if (foundWaypoint) {
+                    break;
+                }
+            }
+        }
+        
+        Waypoint *newWaypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:waypoint.coordinate];
+        [self.map insertWaypoint:newWaypoint atIndex:totalSteps];
+        [self.map beginEditingWaypoint:newWaypoint];
+         */
     }
 }
 
 - (void)refreshRoute {
     
-    if (self.map.waypoints.count > 1) {
+    if (self.ride.waypoints.count > 1) {
         
-        NSMutableArray *locations = [NSMutableArray new];
-        for (Waypoint *waypoint in self.map.waypoints) {
+        if (!self.ride.route) {
             
-            if (waypoint.type == WaypointTypeDestination) {
-                CLLocationCoordinate2D coordinate = waypoint.coordinate;
-                CLLocation *location = [[CLLocation alloc] initWithLatitude:coordinate.latitude longitude:coordinate.longitude];
-                [locations addObject:location];
-            }
-        }
-        
-        GoogleDirectionsRequest *directions = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
-        [directions loadDirectionsForPath:locations WithCallback:^(NSArray *routes, NSError *error) {
-            
-            if (!error) {
-                
-                GoogleDirectionsRoute *route = routes.firstObject;
-                
-                if (route.legs.count < self.route.legs.count) {
-                    for (NSUInteger i = route.legs.count; i < self.route.legs.count; i++) {
-                        NSNumber *polylineIdentifier = [NSNumber numberWithUnsignedInteger:i];
-                        [self.map removePolylineWithIdentifier:polylineIdentifier];
-                    }
+            [self.ride loadDirectionsWithCallback:^(GoogleDirectionsRoute *route, NSError *error) {
+                if (!error) {
+                    [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
                 }
-                
-                self.route = route;
-                
-                [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
-            }
-        }];
-    }
-    else {
-        [self.map removePolylineWithIdentifier:[NSNumber numberWithInt:0]];
+                else {
+                    NSLog(@"Error loading route.");
+                }
+            }];
+        }
+        else {
+            [self drawRoute];
+        }
     }
     
 }
 
 - (void)drawRoute {
     
-    int count = 0;
-    for (GoogleDirectionsLeg *leg in self.route.legs) {
-        
-        NSNumber *identifier = [NSNumber numberWithInt:count];
-        [self.map addPolyline:leg.polyline withIdentifier:identifier];
-        
-        count++;
-        
-        for (GoogleDirectionsStep *step in leg.steps) {
-            CLLocationCoordinate2D turnCoordinate = step.startLocation.coordinate;
-            
-            if (step != leg.steps.firstObject) {
-                Waypoint *turnWaypoint = [[Waypoint alloc] initWithType:WaypointTypeTurn coordinate:turnCoordinate];
-                [self.map addWaypoint:turnWaypoint];
-            }
-        }
-    }
+    [self.map removeAllPolylines];
+    [self.map removeAllWaypoints];
+    
+    [self.map addPolyline:self.ride.route.overviewPolyline withIdentifier:@"polyline"];
+    [self.map addWaypoints:self.ride.allWaypoints];
 }
 
 - (void)refreshNavBar {

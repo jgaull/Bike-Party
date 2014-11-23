@@ -30,4 +30,22 @@
     return self;
 }
 
+- (BOOL)isEqual:(id)object {
+    if ([object isKindOfClass:[Waypoint class]]) {
+        
+        Waypoint *otherWaypoint = (Waypoint *)object;
+        
+        if (otherWaypoint.coordinate.latitude == self.coordinate.latitude &&
+            otherWaypoint.coordinate.longitude == self.coordinate.longitude &&
+            [otherWaypoint.title isEqualToString:self.title] &&
+            [otherWaypoint.subtitle isEqualToString:self.subtitle] &&
+            otherWaypoint.type == self.type) {
+            
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
 @end
