@@ -9,6 +9,7 @@
 #import "CreateRouteViewController.h"
 #import "GoogleDirectionsRequest.h"
 #import "GoogleDirectionsLeg.h"
+#import "GoogleDirectionsStep.h"
 
 @interface CreateRouteViewController ()
 
@@ -56,6 +57,7 @@
     
     Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:coordinate];
     [self.map insertWaypoint:waypoint atIndex:index];
+    [self.map beginEditingWaypoint:waypoint];
 }
 
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didUpdateEditingWaypoint:(Waypoint *)waypoint {
@@ -69,6 +71,7 @@
     
     Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate title:nil];
     [self.map addWaypoint:waypoint];
+    [self.map beginEditingWaypoint:waypoint];
 }
 
 - (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectWaypoint:(Waypoint *)waypoint {
@@ -122,7 +125,9 @@
 - (void)userDidTapEditWaypoint:(UIBarButtonItem *)button {
     NSLog(@"Edit");
     
-    [self.map beginEditingWaypoint:self.map.selectedWaypoint];
+    if (self.map.selectedWaypoint.type == WaypointTypeDestination) {
+        [self.map beginEditingWaypoint:self.map.selectedWaypoint];
+    }
 }
 
 - (void)refreshRoute {
@@ -132,10 +137,11 @@
         NSMutableArray *locations = [NSMutableArray new];
         for (Waypoint *waypoint in self.map.waypoints) {
             
-            CLLocationCoordinate2D coordinate = waypoint.coordinate;
-            CLLocation *location = [[CLLocation alloc] initWithLatitude:coordinate.latitude longitude:coordinate.longitude];
-            [locations addObject:location];
-            
+            if (waypoint.type == WaypointTypeDestination) {
+                CLLocationCoordinate2D coordinate = waypoint.coordinate;
+                CLLocation *location = [[CLLocation alloc] initWithLatitude:coordinate.latitude longitude:coordinate.longitude];
+                [locations addObject:location];
+            }
         }
         
         GoogleDirectionsRequest *directions = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
@@ -173,6 +179,15 @@
         [self.map addPolyline:leg.polyline withIdentifier:identifier];
         
         count++;
+        
+        for (GoogleDirectionsStep *step in leg.steps) {
+            CLLocationCoordinate2D turnCoordinate = step.startLocation.coordinate;
+            
+            if (step != leg.steps.firstObject) {
+                Waypoint *turnWaypoint = [[Waypoint alloc] initWithType:WaypointTypeTurn coordinate:turnCoordinate];
+                [self.map addWaypoint:turnWaypoint];
+            }
+        }
     }
 }
 

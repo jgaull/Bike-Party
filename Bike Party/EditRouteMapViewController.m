@@ -13,8 +13,8 @@
 
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 
-@property (strong, nonatomic) MKPinAnnotationView *pinView;
-@property (strong, nonatomic) NSObject <MKAnnotation> *pinDropAnnotation;
+@property (strong, nonatomic) MKAnnotationView *pinView;
+@property (nonatomic) BOOL transitioningToEditMode;
 
 @property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
 @property (strong, nonatomic) UITapGestureRecognizer *tap;
@@ -103,12 +103,12 @@
 
 - (void)insertWaypoint:(Waypoint *)waypoint atIndex:(NSUInteger)index {
     [self.mutableWaypoints insertObject:waypoint atIndex:index];
-    [self beginEditingWaypoint:waypoint];
+    [self.mapView addAnnotation:waypoint];
 }
 
 - (void)addWaypoint:(Waypoint *)waypoint {
     [self.mutableWaypoints addObject:waypoint];
-    [self beginEditingWaypoint:waypoint];
+    [self.mapView addAnnotation:waypoint];
 }
 
 - (void)removeWaypoint:(Waypoint *)waypoint {
@@ -124,10 +124,7 @@
     
     //When the pin and map are centered we use this
     _editingWaypoint = waypoint;
-    
-    //Create an annotation to add a pin to the map
-    self.pinDropAnnotation = waypoint;
-    [self.mapView addAnnotation:waypoint];
+    self.transitioningToEditMode = YES;
     
     CLLocationCoordinate2D coordinate = waypoint.coordinate;
     MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coordinate, 0.005131, 0.004123);
@@ -370,23 +367,57 @@
 
 #pragma mark - MKMapViewDelegate Methods
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
-    MKPinAnnotationView *pin = (MKPinAnnotationView *) [self.mapView dequeueReusableAnnotationViewWithIdentifier: @"destinationPin"];
-    if (pin == nil) {
-        pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: @"destinationPin"];
-        //UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeContactAdd];
-        //UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    
+    if ([annotation isKindOfClass:[Waypoint class]]) {
+        Waypoint *waypoint = (Waypoint *)annotation;
         
-        pin.animatesDrop = YES;
-        pin.canShowCallout = YES;
-        //pin.rightCalloutAccessoryView = rightButton;
-        //pin.leftCalloutAccessoryView = leftButton;
-        //pin.draggable = YES;
+        NSString *identifier = [self annotationIdentifierForWaypoint:waypoint];
+        MKAnnotationView *annotationView = [self.mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
         
-    } else {
-        pin.annotation = annotation;
+        if (!annotationView) {
+            
+            if (waypoint.type == WaypointTypeDestination) {
+                annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: identifier];
+                UIImage *pinImage = [UIImage imageNamed:@"destinationMarker.png"];
+                annotationView.image = pinImage;
+                annotationView.centerOffset = CGPointMake(0, -pinImage.size.height / 2);
+            }
+            else if (waypoint.type == WaypointTypeTurn) {
+                annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:identifier];
+                UIImage *pinImage = [UIImage imageNamed:@"turnMarker.png"];
+                annotationView.image = pinImage;
+                annotationView.centerOffset = CGPointZero;
+            }
+        }
+        
+        annotationView.annotation = waypoint;
+        
+        return annotationView;
     }
     
-    return pin;
+    return nil;
+}
+
+- (NSString *)annotationIdentifierForWaypoint:(Waypoint *)waypoint {
+    NSString *identifier;
+    switch (waypoint.type) {
+        case WaypointTypeDestination:
+            identifier = @"destination";
+            break;
+        case WaypointTypeTurn:
+            identifier = @"turn";
+            break;
+        case WaypointTypeViaPoint:
+            identifier = @"via";
+            break;
+            
+        default:
+            identifier = @"";
+            NSLog(@"unknown waypoint type");
+            break;
+    }
+    
+    return identifier;
 }
 
 /*
@@ -425,21 +456,22 @@
  */
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
-    if (self.pinDropAnnotation) {
+    if (self.transitioningToEditMode) {
         
-        MKPinAnnotationView *mapPin = [[MKPinAnnotationView alloc] initWithAnnotation:self.pinDropAnnotation reuseIdentifier:@"testPin"];
-
+        MKAnnotationView *mapPin = [self.mapView viewForAnnotation:self.editingWaypoint];
+        
+        [self.mapView removeAnnotation:self.editingWaypoint];
+        
         CGSize pinSize = mapPin.frame.size;
         CGSize frameSize = self.mapView.frame.size;
         CGPoint offset = mapPin.centerOffset;
 
-        mapPin.frame = CGRectMake(frameSize.width / 2 - offset.x, frameSize.height / 2 - pinSize.height - offset.y - 10, pinSize.width, pinSize.height);
+        mapPin.frame = CGRectMake(frameSize.width / 2 - pinSize.width / 2 + offset.x, frameSize.height / 2 - pinSize.height / 2 + offset.y, pinSize.width, pinSize.height);
         [self.mapView addSubview:mapPin];
 
         self.pinView = mapPin;
         
-        [self.mapView removeAnnotation:self.pinDropAnnotation];
-        self.pinDropAnnotation = nil;
+        self.transitioningToEditMode = NO;
     }
     else if (self.editingWaypoint) {
         self.editingWaypoint.coordinate = self.mapView.centerCoordinate;
@@ -453,8 +485,8 @@
 - (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay {
     
     MKPolylineRenderer *polylineRenderer = [[MKPolylineRenderer alloc] initWithPolyline:overlay];
-    polylineRenderer.strokeColor = [UIColor redColor];
-    polylineRenderer.lineWidth = 3.0;
+    polylineRenderer.strokeColor = [UIColor colorWithRed:0.9843137255 green:0.4470588235 blue:0.1450980392 alpha:1];
+    polylineRenderer.lineWidth = 4.0;
     
     return polylineRenderer;
 }
