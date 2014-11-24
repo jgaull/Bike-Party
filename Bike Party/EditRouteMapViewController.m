@@ -11,13 +11,11 @@
 
 @interface EditRouteMapViewController ()
 
-@property (weak, nonatomic) IBOutlet MKMapView *mapView;
+//@property (strong, nonatomic) MKAnnotationView *pinView;
+//@property (nonatomic) BOOL transitioningToEditMode;
 
-@property (strong, nonatomic) MKAnnotationView *pinView;
-@property (nonatomic) BOOL transitioningToEditMode;
-
-@property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
-@property (strong, nonatomic) UITapGestureRecognizer *tap;
+//@property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
+//@property (strong, nonatomic) UITapGestureRecognizer *tap;
 @property (strong, nonatomic) UIPanGestureRecognizer *pan;
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinch;
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTap;
@@ -26,7 +24,7 @@
 @property (nonatomic) MKCoordinateRegion originalRegion;
 @property (strong, nonatomic) CLLocation *originalCenter;
 
-@property (strong, nonatomic) NSMutableArray *mutableWaypoints;
+//@property (strong, nonatomic) NSMutableArray *mutableWaypoints;
 @property (strong, nonatomic) NSMutableDictionary *polylines;
 
 @end
@@ -34,6 +32,7 @@
 @implementation EditRouteMapViewController
 
 #pragma mark - Public Interface
+/*
 - (void)confirmEdits {
     CLLocationCoordinate2D coordinate;
     if (self.originalCenter) {
@@ -52,6 +51,7 @@
     [self.mutableWaypoints removeObject:self.editingWaypoint];
     [self endEditing];
 }
+ */
 
 - (void)addPolyline:(MKPolyline *)polyline withIdentifier:(id <NSCopying>)identifier {
     
@@ -61,14 +61,14 @@
     }
     
     [self.polylines setObject:polyline forKey:identifier];
-    [self.mapView addOverlay:polyline];
+    [self addOverlay:polyline];
 }
 
 - (void)removePolylineWithIdentifier:(id <NSCopying>)identifier {
     
     MKPolyline *polyline = [self.polylines objectForKey:identifier];
     if (polyline) {
-        [self.mapView removeOverlay:polyline];
+        [self removeOverlay:polyline];
         [self.polylines removeObjectForKey:identifier];
     }
 }
@@ -81,7 +81,7 @@
         [polylines addObject:polyline];
     }
     
-    [self.mapView removeOverlays:polylines];
+    [self removeOverlays:polylines];
     self.polylines = nil;
 }
 
@@ -91,7 +91,7 @@
     if (polyline) {
         MKMapRect mapRect = polyline.boundingMapRect;
         UIEdgeInsets padding = UIEdgeInsetsMake(edgeInsets, edgeInsets, edgeInsets, edgeInsets);
-        [self.mapView setVisibleMapRect:mapRect edgePadding:padding animated:animated];
+        [self setVisibleMapRect:mapRect edgePadding:padding animated:animated];
     }
 }
 
@@ -110,9 +110,10 @@
     }
     
     UIEdgeInsets padding = UIEdgeInsetsMake(edgeInsets, edgeInsets, edgeInsets, edgeInsets);
-    [self.mapView setVisibleMapRect:boundingBox edgePadding:padding animated:animated];
+    [self setVisibleMapRect:boundingBox edgePadding:padding animated:animated];
 }
 
+/*
 - (void)insertWaypoint:(Waypoint *)waypoint atIndex:(NSUInteger)index {
     [self.mutableWaypoints insertObject:waypoint atIndex:index];
     [self.mapView addAnnotation:waypoint];
@@ -141,12 +142,16 @@
     [self.mapView removeAnnotations:waypoints];
     [self.mutableWaypoints removeObjectsInArray:waypoints];
 }
+ */
 
+/*
 - (void)removeAllWaypoints {
     [self.mapView removeAnnotations:self.waypoints];
     self.mutableWaypoints = nil;
 }
+ */
 
+/*
 - (void)beginEditingWaypoint:(Waypoint *)waypoint {
     
     //When the pin and map are centered we use this
@@ -174,23 +179,27 @@
         [self.delegate editRouteMap:self didBeginEditingWaypoint:waypoint];
     }
 }
+ */
 
 #pragma mark - UIViewController overrides
-- (void)viewDidLoad {
+- (void)willMoveToSuperview:(UIView *)newSuperview {
     
-    [super viewDidLoad];
+    [super willMoveToSuperview:newSuperview];
     
     //long press is used to add waypoints
+    /*
     self.longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-    [self.mapView addGestureRecognizer:self.longPress];
+    [self addGestureRecognizer:self.longPress];
+     */
     
+    /*
     //tap is also used to add waypoints
     self.tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
     
     //The default double tap behavior (zoom the map in) conflicts with our single tap.
     //We fix this problem by finding the double tap gesture recognizer and requiring
     //the single tap to fail in the event of a double tap.
-    for (UIView *view in self.mapView.subviews) {
+    for (UIView *view in self.subviews) {
         for (UIGestureRecognizer *gesture in view.gestureRecognizers) {
             if ([gesture isKindOfClass:[UITapGestureRecognizer class]]) {
                 
@@ -202,7 +211,8 @@
         }
     }
     
-    [self.mapView addGestureRecognizer:self.tap];
+    [self addGestureRecognizer:self.tap];
+     */
     
     //Pinch used for zooming in and out while editing
     self.pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
@@ -228,29 +238,24 @@
 }
 
 #pragma mark - UIGestureRecognizer handlers
+
+/*
 - (void)handleTap:(UITapGestureRecognizer *)tap {
     if (tap.state == UIGestureRecognizerStateEnded) {
         
-        CGPoint tapPoint = [tap locationInView:self.mapView];
+        CGPoint tapPoint = [tap locationInView:self];
         
         if (self.selectedWaypoint) {
-            MKAnnotationView *annotationView = [self.mapView viewForAnnotation:self.selectedWaypoint];
+            MKAnnotationView *annotationView = [self viewForAnnotation:self.selectedWaypoint];
             [annotationView setSelected:NO animated:YES];
-            
-            Waypoint *waypoint = self.selectedWaypoint;
             _selectedWaypoint = nil;
-            
-            if ([self.delegate respondsToSelector:@selector(editRouteMap:didDeselectWaypoint:)]) {
-                
-                [self.delegate editRouteMap:self didDeselectWaypoint:waypoint];
-            }
             
             return;
         }
         
-        for (Waypoint *waypoint in self.mapView.annotations) {
+        for (Waypoint *waypoint in self.annotations) {
             
-            MKAnnotationView *annotationView = [self.mapView viewForAnnotation:waypoint];
+            MKAnnotationView *annotationView = [self viewForAnnotation:waypoint];
             CGRect frame = annotationView.frame;
             
             if (CGRectContainsPoint(frame, tapPoint)) {
@@ -258,25 +263,15 @@
                 _selectedWaypoint = waypoint;
                 [annotationView setSelected:YES animated:YES];
                 
-                if ([self.delegate respondsToSelector:@selector(editRouteMap:didSelectWaypoint:)]) {
-                    [self.delegate editRouteMap:self didSelectWaypoint:waypoint];
-                }
-                
                 return;
             }
         }
         
-        if ([self.delegate respondsToSelector:@selector(editRouteMap:didSelectCoordinate:)]) {
-            
-            CGPoint touchPoint = [tap locationInView:self.mapView];
-            CLLocationCoordinate2D coordinate = [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
-            
-            [self.delegate editRouteMap:self didSelectCoordinate:coordinate];
-        }
-        
     }
 }
+ */
 
+/*
 - (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
     if (longPress.state == UIGestureRecognizerStateBegan) {
         
@@ -315,6 +310,7 @@
         }
     }
 }
+ */
 
 - (void)handleDoubleTap:(UITapGestureRecognizer *)doubleTap {
     //NSLog(@"Double tap: %ld", doubleTap.state);
@@ -324,7 +320,7 @@
         [self cancelScrollingUpdate];
         
         float zoomMultiplier = 0.5;
-        MKCoordinateSpan currentSpan = self.mapView.region.span;
+        MKCoordinateSpan currentSpan = self.region.span;
         MKCoordinateSpan zoomedSpan = MKCoordinateSpanMake(currentSpan.latitudeDelta * zoomMultiplier, currentSpan.longitudeDelta * zoomMultiplier);
         
         CLLocationCoordinate2D targetCenter;
@@ -332,10 +328,10 @@
             targetCenter = self.originalCenter.coordinate;
         }
         else {
-            targetCenter = self.mapView.centerCoordinate;
+            targetCenter = self.centerCoordinate;
         }
         
-        [self.mapView setRegion:MKCoordinateRegionMake(targetCenter, zoomedSpan) animated:YES];
+        [self setRegion:MKCoordinateRegionMake(targetCenter, zoomedSpan) animated:YES];
     }
 }
 
@@ -346,14 +342,14 @@
         
         [self cancelScrollingUpdate];
         
-        self.mapView.scrollEnabled = NO;
+        self.scrollEnabled = NO;
         
         if (!self.originalCenter) {
-            CLLocationCoordinate2D centerCoordinate = self.mapView.centerCoordinate;
+            CLLocationCoordinate2D centerCoordinate = self.centerCoordinate;
             self.originalCenter = [[CLLocation alloc] initWithLatitude:centerCoordinate.latitude longitude:centerCoordinate.longitude];
         }
         
-        self.originalRegion = self.mapView.region;
+        self.originalRegion = self.region;
     }
     else if (pinch.state == UIGestureRecognizerStateChanged) {
         //NSLog(@"pinch changed");
@@ -364,15 +360,15 @@
         londelta = MAX(MIN(londelta, 150), 0);
         MKCoordinateSpan span = MKCoordinateSpanMake(latdelta, londelta);
         
-        [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
+        [self setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
     }
     else if (pinch.state == UIGestureRecognizerStateCancelled) {
         //NSLog(@"pinch cancelled");
-        self.mapView.scrollEnabled = YES;
+        self.scrollEnabled = YES;
     }
     else if (pinch.state == UIGestureRecognizerStateEnded) {
         //NSLog(@"pinch ended");
-        self.mapView.scrollEnabled = YES;
+        self.scrollEnabled = YES;
         [self mapZoomUpdatesLoop];
     }
 }
@@ -393,6 +389,7 @@
 }
 
 #pragma mark - MKMapViewDelegate Methods
+/*
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
     
     if ([annotation isKindOfClass:[Waypoint class]]) {
@@ -446,6 +443,7 @@
     
     return identifier;
 }
+ */
 
 /*
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
@@ -482,6 +480,7 @@
 }
  */
 
+/*
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
     if (self.transitioningToEditMode) {
         
@@ -517,6 +516,7 @@
     
     return polylineRenderer;
 }
+ */
 
 #pragma mark - UIGestureRecognizerDelegate Methods
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
@@ -527,18 +527,20 @@
 #pragma mark - helper methods
 - (void)deselectSelectedWaypoint {
     
-    MKAnnotationView *annotationView = [self.mapView viewForAnnotation:self.selectedWaypoint];
+    MKAnnotationView *annotationView = [self viewForAnnotation:self.selectedWaypoint];
     [annotationView setSelected:NO animated:YES];
     
-    Waypoint *waypoint = self.selectedWaypoint;
+    //Waypoint *waypoint = self.selectedWaypoint;
     _selectedWaypoint = nil;
     
+    /*
     if ([self.delegate respondsToSelector:@selector(editRouteMap:didDeselectWaypoint:)]) {
-        
         [self.delegate editRouteMap:self didDeselectWaypoint:waypoint];
     }
+     */
 }
 
+/*
 - (void)endEditing {
     _editingWaypoint = nil;
     
@@ -562,6 +564,7 @@
         [self.delegate editRouteMap:self didEndEditingWaypoint:nil];
     }
 }
+ */
 
 static float velocityDecay = 0.9;
 static float otherVelocityDecay = 0.75;
@@ -583,15 +586,15 @@ static NSDate *lastRun;
     currentVelocity *= decay;
     pinchScale = currentVelocity * timeSinceLastRun;
     
-    double latitudeDelta = self.mapView.region.span.latitudeDelta * (1 - pinchScale);
-    double longitudeDelta = self.mapView.region.span.longitudeDelta * (1 - pinchScale);
+    double latitudeDelta = self.region.span.latitudeDelta * (1 - pinchScale);
+    double longitudeDelta = self.region.span.longitudeDelta * (1 - pinchScale);
     float minDelta = 0.003432;
     float maxDelta = 150;
     latitudeDelta = MAX(MIN(latitudeDelta, maxDelta), minDelta);
     longitudeDelta = MAX(MIN(longitudeDelta, maxDelta), minDelta);
     MKCoordinateSpan span = MKCoordinateSpanMake(latitudeDelta, longitudeDelta);
     
-    [self.mapView setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
+    [self setRegion:MKCoordinateRegionMake(self.originalCenter.coordinate, span) animated:NO];
     
     if (ABS(currentVelocity) > 0.05 && latitudeDelta < maxDelta && latitudeDelta > minDelta && longitudeDelta < maxDelta && longitudeDelta > minDelta) {
         
@@ -607,11 +610,6 @@ static NSDate *lastRun;
 - (void)cancelScrollingUpdate {
     lastRun = nil;
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(mapZoomUpdatesLoop) object:nil];
-}
-
-- (CGPoint)convertMapPointToPoint:(MKMapPoint)mapPoint {
-    CLLocationCoordinate2D coordinate = MKCoordinateForMapPoint(mapPoint);
-    return [self.mapView convertCoordinate:coordinate toPointToView:self.mapView];
 }
 
 - (CGPoint)testSegmentWithStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint forIntersectionWithCircleAtPoint:(CGPoint)circleCenter withRadius:(double)radius {
@@ -701,13 +699,65 @@ static NSDate *lastRun;
     return ABS(hypot((point1.x - point2.x), (point1.y - point2.y)));
 }
 
+- (CGPoint)convertMapPointToPoint:(MKMapPoint)mapPoint {
+    CLLocationCoordinate2D coordinate = MKCoordinateForMapPoint(mapPoint);
+    return [self convertCoordinate:coordinate toPointToView:self];
+}
+
+- (void)lock {
+    //[self removeGestureRecognizer:self.longPress];
+    //[self removeGestureRecognizer:self.tap];
+    
+    [self addGestureRecognizer:self.touch];
+    [self addGestureRecognizer:self.pinch];
+    [self addGestureRecognizer:self.doubleTap];
+    [self addGestureRecognizer:self.pan];
+    
+    self.zoomEnabled = NO;
+}
+
+- (void)unlock {
+    //[self addGestureRecognizer:self.longPress];
+    //[self addGestureRecognizer:self.tap];
+    
+    [self removeGestureRecognizer:self.pinch];
+    [self removeGestureRecognizer:self.doubleTap];
+    [self removeGestureRecognizer:self.touch];
+    [self removeGestureRecognizer:self.pan];
+    
+    self.zoomEnabled = YES;
+}
+
 #pragma mark - Getters and Setters
+- (void)setLockCenterWhileZooming:(BOOL)lockCenterWhileZooming {
+    if (_lockCenterWhileZooming != lockCenterWhileZooming) {
+        if (lockCenterWhileZooming) {
+            [self lock];
+        }
+        else {
+            [self unlock];
+        }
+    }
+    
+    _lockCenterWhileZooming = lockCenterWhileZooming;
+}
+
+- (CLLocationCoordinate2D)centerCoordinate {
+    if (self.originalCenter) {
+        return self.originalCenter.coordinate;
+    }
+    
+    return [super centerCoordinate];
+}
+
+/*
 - (NSMutableArray *)mutableWaypoints {
     if (!_mutableWaypoints) {
         _mutableWaypoints = [NSMutableArray new];
     }
     return _mutableWaypoints;
 }
+ */
 
 - (NSMutableDictionary *)polylines {
     if (!_polylines) {
@@ -716,8 +766,10 @@ static NSDate *lastRun;
     return _polylines;
 }
 
+/*
 - (NSArray *)waypoints {
     return [NSArray arrayWithArray:self.mutableWaypoints];
 }
+ */
 
 @end

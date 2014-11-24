@@ -16,10 +16,12 @@
 @property (readonly, nonatomic) GoogleDirectionsRoute *route;
 @property (readonly, nonatomic) NSArray *waypoints;
 @property (readonly, nonatomic) NSArray *allWaypoints;
+@property (nonatomic, readonly) BOOL routeRequiresRefresh;
 
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate;
 - (void)removeDestination:(Waypoint *)destination;
 - (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination;
+- (void)replaceDestination:(Waypoint *)oldDestination withDestination:(Waypoint *)newDestination;
 
 - (void)loadDirectionsWithCallback:(void (^)(GoogleDirectionsRoute *route, NSError *error))callback;
 

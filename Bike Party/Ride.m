@@ -18,20 +18,27 @@
 
 - (void)loadDirectionsWithCallback:(void (^)(GoogleDirectionsRoute *, NSError *))callback {
     
-    NSMutableArray *path = [NSMutableArray new];
-    for (Waypoint *waypoint in self.mutableWaypoints) {
-        CLLocation *location = [[CLLocation alloc] initWithLatitude:waypoint.coordinate.latitude longitude:waypoint.coordinate.longitude];
-        [path addObject:location];
-    }
-    
-    GoogleDirectionsRequest *directions = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
-    [directions loadDirectionsForPath:path WithCallback:^(NSArray *routes, NSError *error) {
-        if (!error) {
-            _route = routes.firstObject;
+    if (self.routeRequiresRefresh) {
+        
+        NSMutableArray *path = [NSMutableArray new];
+        for (Waypoint *waypoint in self.mutableWaypoints) {
+            CLLocation *location = [[CLLocation alloc] initWithLatitude:waypoint.coordinate.latitude longitude:waypoint.coordinate.longitude];
+            [path addObject:location];
         }
         
-        callback(_route, error);
-    }];
+        GoogleDirectionsRequest *directions = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
+        [directions loadDirectionsForPath:path WithCallback:^(NSArray *routes, NSError *error) {
+            if (!error) {
+                _route = routes.firstObject;
+                _routeRequiresRefresh = NO;
+            }
+            
+            callback(_route, error);
+        }];
+    }
+    else {
+        callback(_route, nil);
+    }
 }
 
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate {
@@ -39,7 +46,7 @@
     
     [self.mutableWaypoints addObject:newDestination];
     
-    _route = nil;
+    _routeRequiresRefresh = YES;
     
     return newDestination;
 }
@@ -47,14 +54,19 @@
 - (void)removeDestination:(Waypoint *)destination {
     [self.mutableWaypoints removeObject:destination];
     
-    _route = nil;
+    _routeRequiresRefresh = YES;
 }
 
 - (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination {
     
     [self.mutableWaypoints replaceObjectAtIndex:index withObject:destination];
     
-    _route = nil;
+    _routeRequiresRefresh = YES;
+}
+
+- (void)replaceDestination:(Waypoint *)oldDestination withDestination:(Waypoint *)newDestination {
+    NSUInteger index = [self.waypoints indexOfObject:oldDestination];
+    [self replaceDestinationAtIndex:index withDestination:newDestination];
 }
 
 - (NSArray *)turnsForLeg:(GoogleDirectionsLeg *)leg {
