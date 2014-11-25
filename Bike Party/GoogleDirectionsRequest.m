@@ -61,6 +61,7 @@
     else {
         NSLog(@"something isn't set");
         NSLog(@"path.count: %lu", (unsigned long)path.count);
+        callback(nil, [NSError errorWithDomain:@"error" code:1 userInfo:nil]);
     }
 }
 

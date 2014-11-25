@@ -32,6 +32,9 @@
                 _route = routes.firstObject;
                 _routeRequiresRefresh = NO;
             }
+            else {
+                _route = nil;
+            }
             
             callback(_route, error);
         }];
@@ -64,9 +67,12 @@
     _routeRequiresRefresh = YES;
 }
 
-- (void)replaceDestination:(Waypoint *)oldDestination withDestination:(Waypoint *)newDestination {
-    NSUInteger index = [self.waypoints indexOfObject:oldDestination];
-    [self replaceDestinationAtIndex:index withDestination:newDestination];
+- (void)updateDestination:(Waypoint *)waypoint toCoordinate:(CLLocationCoordinate2D)coordinate {
+    NSInteger index = [self.waypoints indexOfObject:waypoint];
+    Waypoint *newDestionation = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
+    [self.mutableWaypoints replaceObjectAtIndex:index withObject:newDestionation];
+    
+    _routeRequiresRefresh = YES;
 }
 
 - (NSArray *)turnsForLeg:(GoogleDirectionsLeg *)leg {
@@ -97,7 +103,9 @@
         [allWaypoints addObjectsFromArray:turns];
     }
     
-    [allWaypoints addObject:self.waypoints.lastObject];
+    if (self.waypoints.count > 0) {
+        [allWaypoints addObject:self.waypoints.lastObject];
+    }
     
     return [NSArray arrayWithArray:allWaypoints];
 }

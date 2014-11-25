@@ -20,7 +20,7 @@
 
 @property (strong, nonatomic) UITapGestureRecognizer *tap;
 
-@property (strong, nonatomic) Waypoint *selectedWaypoint;
+@property (strong, nonatomic) Waypoint *editingWaypoint;
 @property (nonatomic) NSInteger editingIndex;
 @property (nonatomic) BOOL transitioningToEditMode;
 @property (nonatomic) BOOL isEditing;
@@ -52,20 +52,22 @@
 
 - (void)confirmEdits {
     
-    [self.ride addDestinationWithCoordinate:self.mapView.centerCoordinate];
-    [self.mapView addAnnotation:self.selectedWaypoint];
+    [self.ride updateDestination:self.editingWaypoint toCoordinate:self.mapView.centerCoordinate];
+    [self.mapView addAnnotation:self.editingWaypoint];
     [self endEditing];
 }
 
 - (void)cancelEdits {
-    [self.ride removeDestination:self.selectedWaypoint];
+    
+    [self.mapView addAnnotation:self.editingWaypoint];
+    [self.mapView setCenterCoordinate:self.editingWaypoint.coordinate animated:YES];
     [self endEditing];
 }
 
 - (void)beginEditingWaypoint:(Waypoint *)waypoint {
     
     //When the pin and map are centered we use this
-    self.selectedWaypoint = waypoint;
+    self.editingWaypoint = waypoint;
     self.transitioningToEditMode = YES;
     self.isEditing = YES;
     self.tap.enabled = NO;
@@ -81,9 +83,9 @@
 
 - (void)endEditing {
     
-    [self.mapView deselectAnnotation:self.selectedWaypoint animated:YES];
+    [self.mapView deselectAnnotation:self.editingWaypoint animated:YES];
     
-    self.selectedWaypoint = nil;
+    self.editingWaypoint = nil;
     self.isEditing = NO;
     self.tap.enabled = YES;
     
@@ -96,11 +98,12 @@
 }
 
 - (void)handleTap:(UITapGestureRecognizer *)tap {
-    if (tap.state == UIGestureRecognizerStateEnded && !self.selectedWaypoint) {
+    if (tap.state == UIGestureRecognizerStateEnded && self.mapView.selectedAnnotations.count == 0) {
         
         CGPoint tapPoint = [tap locationInView:self.mapView];
         CLLocationCoordinate2D tapCoordinate = [self.mapView convertPoint:tapPoint toCoordinateFromView:self.mapView];
-        Waypoint *tapWaypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:tapCoordinate];
+        Waypoint *tapWaypoint = [self.ride addDestinationWithCoordinate:tapCoordinate];
+        
         [self.mapView addAnnotation:tapWaypoint];
         [self beginEditingWaypoint:tapWaypoint];
     }
@@ -205,9 +208,9 @@
 
 - (void)userDidTapCancel:(UIBarButtonItem *)button {
     
-    [self.ride removeDestination:self.selectedWaypoint];
-    [self cancelEdits];
+    //[self.ride removeDestination:self.selectedWaypoint];
     
+    [self cancelEdits];
     [self refreshNavBar];
     [self refreshRoute];
 }
@@ -219,7 +222,8 @@
     
     UIAlertAction *confirm = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
         
-        [self.ride removeDestination:self.selectedWaypoint];
+        Waypoint *selectedWaypoint = self.mapView.selectedAnnotations.firstObject;
+        [self.ride removeDestination:selectedWaypoint];
         
         [self endEditing];
         [self refreshRoute];
@@ -235,7 +239,7 @@
 - (void)userDidTapEditWaypoint:(UIBarButtonItem *)button {
     NSLog(@"Edit");
     
-    Waypoint *waypoint = self.selectedWaypoint;
+    Waypoint *waypoint = self.mapView.selectedAnnotations.firstObject;
     if (waypoint.type == WaypointTypeDestination) {
         [self beginEditingWaypoint:waypoint];
     }
@@ -334,9 +338,9 @@
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
     if (self.transitioningToEditMode) {
         
-        MKAnnotationView *mapPin = [self.mapView viewForAnnotation:self.selectedWaypoint];
+        MKAnnotationView *mapPin = [self.mapView viewForAnnotation:self.editingWaypoint];
         
-        [self.mapView removeAnnotation:self.selectedWaypoint];
+        [self.mapView removeAnnotation:self.editingWaypoint];
         
         CGSize pinSize = mapPin.frame.size;
         CGSize frameSize = self.mapView.frame.size;
@@ -345,12 +349,12 @@
         mapPin.frame = CGRectMake(frameSize.width / 2 - pinSize.width / 2 + offset.x, frameSize.height / 2 - pinSize.height / 2 + offset.y, pinSize.width, pinSize.height);
         [self.mapView addSubview:mapPin];
         
-        self.pinView = [self mapView:mapView viewForAnnotation:self.selectedWaypoint];
+        self.pinView = [self mapView:mapView viewForAnnotation:self.editingWaypoint];
         
         self.transitioningToEditMode = NO;
     }
     else if (self.isEditing) {
-        self.selectedWaypoint.coordinate = self.mapView.centerCoordinate;
+        //self.editingWaypoint.coordinate = self.mapView.centerCoordinate;
     }
 }
 
@@ -367,49 +371,54 @@
     NSLog(@"Selected");
     
     if ([view.annotation isKindOfClass:[Waypoint class]]) {
-        Waypoint *waypoint = (Waypoint *)view.annotation;
-        self.selectedWaypoint = waypoint;
         [self refreshNavBar];
+    }
+    else {
+        NSLog(@"Wrong type of annotation!");
     }
 }
 
 - (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view {
     NSLog(@"Deselected");
-    self.selectedWaypoint = nil;
     [self refreshNavBar];
 }
 
 - (void)refreshRoute {
     
-    if (self.ride.waypoints.count > 1) {
-        
-        if (self.ride.routeRequiresRefresh) {
+    [self clearRoute];
+    
+    [self.ride loadDirectionsWithCallback:^(GoogleDirectionsRoute *route, NSError *error) {
+        if (!error) {
             
-            [self.mapView removeAnnotations:self.ride.allWaypoints];
-            [self.mapView removeOverlay:self.ride.route.overviewPolyline];
-            
-            [self.ride loadDirectionsWithCallback:^(GoogleDirectionsRoute *route, NSError *error) {
-                if (!error) {
-                    
-                    //If this is called on a background thread the app crashes.
-                    [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
-                }
-                else {
-                    NSLog(@"Error loading route.");
-                }
-            }];
+            //If this is called on a background thread the app crashes.
+            //[self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
         }
         else {
-            [self drawRoute];
+            NSLog(@"Error loading route.");
         }
-    }
+        
+        [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
+    }];
     
+}
+
+- (void)clearRoute {
+    
+    NSArray *annotations = self.mapView.annotations;
+    NSArray *overlays = self.mapView.overlays;
+    [self.mapView removeAnnotations:annotations];
+    [self.mapView removeOverlays:overlays];
 }
 
 - (void)drawRoute {
     
-    [self.mapView addAnnotations:self.ride.allWaypoints];
-    [self.mapView addOverlay:self.ride.route.overviewPolyline];
+    if (self.ride.allWaypoints.count > 0) {
+        [self.mapView addAnnotations:self.ride.allWaypoints];
+    }
+    
+    if (self.ride.route.overviewPolyline) {
+        [self.mapView addOverlay:self.ride.route.overviewPolyline];
+    }
 }
 
 - (void)refreshNavBar {
@@ -422,9 +431,9 @@
         leftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(userDidTapCancel:)];
         rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(userDidTapDone:)];
     }
-    else if (self.selectedWaypoint) {
-        
-            rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEditWaypoint:)];
+    else if (self.mapView.selectedAnnotations.count > 0) {
+        leftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(userDidTapDeleteWaypoint:)];
+        rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEditWaypoint:)];
     }
     
     [self.navigationBar.topItem setLeftBarButtonItem:leftButton animated:YES];

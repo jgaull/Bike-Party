@@ -21,7 +21,7 @@
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate;
 - (void)removeDestination:(Waypoint *)destination;
 - (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination;
-- (void)replaceDestination:(Waypoint *)oldDestination withDestination:(Waypoint *)newDestination;
+- (void)updateDestination:(Waypoint *)waypoint toCoordinate:(CLLocationCoordinate2D)coordinate;
 
 - (void)loadDirectionsWithCallback:(void (^)(GoogleDirectionsRoute *route, NSError *error))callback;
 
