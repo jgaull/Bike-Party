@@ -7,10 +7,11 @@
 //
 
 #import "Ride.h"
+#import "TurnAnnotation.h"
 
 @interface Ride ()
 
-@property (strong, nonatomic) NSMutableArray *mutableDestinations;
+@property (strong, nonatomic) NSMutableArray *mutableWaypoints;
 
 @end
 
@@ -21,7 +22,7 @@
     if (self.routeRequiresRefresh) {
         
         NSMutableArray *path = [NSMutableArray new];
-        for (Waypoint *waypoint in self.destinations) {
+        for (Waypoint *waypoint in self.waypoints) {
             CLLocation *location = [[CLLocation alloc] initWithLatitude:waypoint.coordinate.latitude longitude:waypoint.coordinate.longitude];
             [path addObject:location];
         }
@@ -46,10 +47,10 @@
 
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate {
     
-    NSInteger legIndex = self.destinations.count;
+    NSInteger legIndex = self.waypoints.count;
     Waypoint *newDestination = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate leg:legIndex];
     
-    [self.mutableDestinations addObject:newDestination];
+    [self.mutableWaypoints addObject:newDestination];
     
     _routeRequiresRefresh = YES;
     
@@ -59,31 +60,31 @@
 - (Waypoint *)addDestinationAtIndex:(NSInteger)index withCoordinate:(CLLocationCoordinate2D)coordinate {
     
     Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate leg:index];
-    [self.mutableDestinations insertObject:waypoint atIndex:index];
+    [self.mutableWaypoints insertObject:waypoint atIndex:index];
     
     _routeRequiresRefresh = YES;
     return waypoint;
 }
 
 - (void)removeDestination:(Waypoint *)destination {
-    [self.mutableDestinations removeObject:destination];
+    [self.mutableWaypoints removeObject:destination];
     
     _routeRequiresRefresh = YES;
 }
 
 - (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination {
     
-    [self.mutableDestinations replaceObjectAtIndex:index withObject:destination];
+    [self.mutableWaypoints replaceObjectAtIndex:index withObject:destination];
     
     _routeRequiresRefresh = YES;
 }
 
 - (void)updateDestination:(Waypoint *)waypoint toCoordinate:(CLLocationCoordinate2D)coordinate {
     
-    if ([self.destinations containsObject:waypoint]) {
-        NSInteger index = [self.destinations indexOfObject:waypoint];
+    if ([self.waypoints containsObject:waypoint]) {
+        NSInteger index = [self.waypoints indexOfObject:waypoint];
         Waypoint *newDestionation = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
-        [self.mutableDestinations replaceObjectAtIndex:index withObject:newDestionation];
+        [self.mutableWaypoints replaceObjectAtIndex:index withObject:newDestionation];
         
         _routeRequiresRefresh = YES;
     }
@@ -92,21 +93,25 @@
     }
 }
 
-- (NSArray *)turnsForLeg:(GoogleDirectionsLeg *)leg {
+- (NSArray *)turnAnnotations {
     NSMutableArray *turns = [NSMutableArray new];
-    NSInteger legIndex = [self.route.legs indexOfObject:leg];
     
-    for (GoogleDirectionsStep *step in leg.steps) {
+    for (int i = 0; i < self.route.legs.count; i++) {
         
-        CLLocationCoordinate2D turnCoordinate = step.startLocation.coordinate;
-        Waypoint *turnWaypoint = [[Waypoint alloc] initWithType:WaypointTypeTurn coordinate:turnCoordinate leg:legIndex];
+        GoogleDirectionsLeg *leg = [self.route.legs objectAtIndex:i];
         
-        [turns addObject:turnWaypoint];
+        for (GoogleDirectionsStep *step in leg.steps) {
+            
+            CLLocationCoordinate2D turnCoordinate = step.startLocation.coordinate;
+            TurnAnnotation *turnAnnotation = [[TurnAnnotation alloc] initWithCoordinate:turnCoordinate leg:i];
+            [turns addObject:turnAnnotation];
+        }
     }
     
     return [NSArray arrayWithArray:turns];
 }
 
+/*
 - (NSArray *)allWaypoints {
     
     NSMutableArray *allWaypoints = [NSMutableArray new];
@@ -127,16 +132,17 @@
     
     return [NSArray arrayWithArray:allWaypoints];
 }
+ */
 
-- (NSMutableArray *)mutableDestinations {
-    if (!_mutableDestinations) {
-        _mutableDestinations = [NSMutableArray new];
+- (NSMutableArray *)mutableWaypoints {
+    if (!_mutableWaypoints) {
+        _mutableWaypoints = [NSMutableArray new];
     }
-    return _mutableDestinations;
+    return _mutableWaypoints;
 }
 
-- (NSArray *)destinations {
-    return [NSArray arrayWithArray:self.mutableDestinations];
+- (NSArray *)waypoints {
+    return [NSArray arrayWithArray:self.mutableWaypoints];
 }
 
 @end

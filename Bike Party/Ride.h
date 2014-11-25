@@ -14,8 +14,8 @@
 @interface Ride : NSObject
 
 @property (readonly, nonatomic) GoogleDirectionsRoute *route;
-@property (readonly, nonatomic) NSArray *destinations;
-@property (readonly, nonatomic) NSArray *allWaypoints;
+@property (readonly, nonatomic) NSArray *waypoints;
+@property (readonly ,nonatomic) NSArray *turnAnnotations;
 @property (nonatomic, readonly) BOOL routeRequiresRefresh;
 
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate;

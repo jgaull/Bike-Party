@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC6CB6EA1A245C6B00E06F1F /* TurnAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = FC6CB6E91A245C6B00E06F1F /* TurnAnnotation.m */; };
 		FCA954CE1A21B26200EE80E1 /* destinationMarker@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCA954CC1A21B26200EE80E1 /* destinationMarker@2x.png */; };
 		FCA954CF1A21B26200EE80E1 /* turnMarker@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCA954CD1A21B26200EE80E1 /* turnMarker@2x.png */; };
 		FCA954D21A226C4C00EE80E1 /* Ride.m in Sources */ = {isa = PBXBuildFile; fileRef = FCA954D11A226C4C00EE80E1 /* Ride.m */; };
@@ -65,6 +66,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FC6CB6E81A245C6B00E06F1F /* TurnAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TurnAnnotation.h; sourceTree = "<group>"; };
+		FC6CB6E91A245C6B00E06F1F /* TurnAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TurnAnnotation.m; sourceTree = "<group>"; };
 		FCA954CC1A21B26200EE80E1 /* destinationMarker@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "destinationMarker@2x.png"; sourceTree = "<group>"; };
 		FCA954CD1A21B26200EE80E1 /* turnMarker@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "turnMarker@2x.png"; sourceTree = "<group>"; };
 		FCA954D01A226C4C00EE80E1 /* Ride.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ride.h; sourceTree = "<group>"; };
@@ -252,6 +255,8 @@
 				FCA954D11A226C4C00EE80E1 /* Ride.m */,
 				FCA954D31A226D2900EE80E1 /* RideLeg.h */,
 				FCA954D41A226D2900EE80E1 /* RideLeg.m */,
+				FC6CB6E81A245C6B00E06F1F /* TurnAnnotation.h */,
+				FC6CB6E91A245C6B00E06F1F /* TurnAnnotation.m */,
 			);
 			path = "Bike Party";
 			sourceTree = "<group>";
@@ -432,6 +437,7 @@
 				FCA954D51A226D2900EE80E1 /* RideLeg.m in Sources */,
 				FCE77B1F1A16AC5400E9763D /* RouteLeg.m in Sources */,
 				FCE77AFD1A14141300E9763D /* GooglePlace.m in Sources */,
+				FC6CB6EA1A245C6B00E06F1F /* TurnAnnotation.m in Sources */,
 				FCE77B031A14318A00E9763D /* AddDestinationViewController.m in Sources */,
 				FCE77AB21A132DF000E9763D /* AppDelegate.m in Sources */,
 				FCE77B191A1468CF00E9763D /* CLLocation+GoogleDirections.m in Sources */,

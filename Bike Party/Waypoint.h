@@ -12,7 +12,6 @@
 
 typedef enum {
     WaypointTypeDestination,
-    WaypointTypeTurn,
     WaypointTypeViaPoint
 } WaypointType;
 

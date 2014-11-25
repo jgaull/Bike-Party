@@ -11,6 +11,7 @@
 #import "GoogleDirectionsLeg.h"
 #import "GoogleDirectionsStep.h"
 #import "Ride.h"
+#import "TurnAnnotation.h"
 
 @interface CreateRouteViewController ()
 
@@ -61,7 +62,7 @@
     
     NSLog(@"confirm edits");
     
-    if (self.editingWaypoint.type == WaypointTypeTurn) {
+    if (self.editingWaypoint.type == WaypointTypeViaPoint) {
         [self.ride addDestinationAtIndex:self.editingWaypoint.leg + 1 withCoordinate:self.mapView.centerCoordinate];
     }
     else {
@@ -85,7 +86,7 @@
     [self refreshRoute];
 }
 
-- (void)userDidTapDeleteWaypoint:(UIBarButtonItem *)button {
+- (void)userDidTapDelete:(UIBarButtonItem *)button {
     NSLog(@"delete");
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete?" message:@"Are you sure you would like to delete this waypoint?" preferredStyle:UIAlertControllerStyleAlert];
@@ -106,18 +107,22 @@
     [self showViewController:alert sender:self];
 }
 
-- (void)userDidTapEditWaypoint:(UIBarButtonItem *)button {
+- (void)userDidTapEdit:(UIBarButtonItem *)button {
     NSLog(@"Edit");
     
-    Waypoint *waypoint = self.mapView.selectedAnnotations.firstObject;
-    if (waypoint.type == WaypointTypeDestination) {
+    Waypoint *waypoint;
+    
+    id <MKAnnotation> annotation = self.mapView.selectedAnnotations.firstObject;
+    if ([annotation isKindOfClass:[Waypoint class]]) {
         
-        [self beginEditingWaypoint:waypoint];
+        waypoint = (Waypoint *)annotation;
     }
-    else if (waypoint.type == WaypointTypeTurn) {
+    else if ([annotation isKindOfClass:[TurnAnnotation class]]) {
         
-        [self beginEditingWaypoint:waypoint];
+        waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:annotation.coordinate];
     }
+    
+    [self beginEditingWaypoint:waypoint];
 }
 
 - (void)beginEditingWaypoint:(Waypoint *)waypoint {
@@ -164,53 +169,52 @@
 #pragma mark - MKMapViewDelegate Methods
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
     
-    if ([annotation isKindOfClass:[Waypoint class]]) {
-        Waypoint *waypoint = (Waypoint *)annotation;
-        
-        NSString *identifier = [self annotationIdentifierForWaypoint:waypoint];
-        MKAnnotationView *annotationView = [self.mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
-        
-        if (!annotationView) {
+    
+    NSString *identifier = [self annotationIdentifierForAnnotation:annotation];
+    MKAnnotationView *annotationView = [self.mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
+    
+    if (!annotationView) {
+        if ([annotation isKindOfClass:[Waypoint class]]) {
             
-            if (waypoint.type == WaypointTypeDestination) {
-                annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: identifier];
-                UIImage *pinImage = [UIImage imageNamed:@"destinationMarker.png"];
-                annotationView.image = pinImage;
-                annotationView.centerOffset = CGPointMake(0, -pinImage.size.height / 2);
-            }
-            else if (waypoint.type == WaypointTypeTurn) {
-                annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:identifier];
-                UIImage *pinImage = [UIImage imageNamed:@"turnMarker.png"];
-                annotationView.image = pinImage;
-                annotationView.centerOffset = CGPointZero;
-            }
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: identifier];
+            UIImage *image = [UIImage imageNamed:@"destinationMarker.png"];
+            annotationView.image = image;
+            annotationView.centerOffset = CGPointMake(0, -image.size.height / 2);
         }
-        
-        annotationView.annotation = waypoint;
-        
-        return annotationView;
+        else if ([annotation isKindOfClass:[TurnAnnotation class]]) {
+            
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:identifier];
+            UIImage *image = [UIImage imageNamed:@"turnMarker.png"];
+            annotationView.image = image;
+            annotationView.centerOffset = CGPointZero;
+        }
     }
     
-    return nil;
+    return annotationView;
 }
 
-- (NSString *)annotationIdentifierForWaypoint:(Waypoint *)waypoint {
+- (NSString *)annotationIdentifierForAnnotation:(id<MKAnnotation>)annotation {
     NSString *identifier;
-    switch (waypoint.type) {
-        case WaypointTypeDestination:
-            identifier = @"destination";
-            break;
-        case WaypointTypeTurn:
-            identifier = @"turn";
-            break;
-        case WaypointTypeViaPoint:
-            identifier = @"via";
-            break;
-            
-        default:
-            identifier = @"";
-            NSLog(@"unknown waypoint type");
-            break;
+    
+    if ([annotation isKindOfClass:[Waypoint class]]) {
+        
+        Waypoint *waypoint = (Waypoint *)annotation;
+        switch (waypoint.type) {
+            case WaypointTypeDestination:
+                identifier = @"destination";
+                break;
+            case WaypointTypeViaPoint:
+                identifier = @"via";
+                break;
+                
+            default:
+                identifier = @"";
+                NSLog(@"unknown waypoint type");
+                break;
+        }
+    }
+    else if ([annotation isKindOfClass:[TurnAnnotation class]]) {
+        identifier = @"turn";
     }
     
     return identifier;
@@ -219,18 +223,19 @@
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
     if (self.transitioningToEditMode) {
         
-        MKAnnotationView *mapPin = [self.mapView viewForAnnotation:self.editingWaypoint];
+        //It might be worth using this unless it's nil.
+        //MKAnnotationView *mapPin = [self.mapView viewForAnnotation:self.editingWaypoint];
+        
+        self.pinView = [self mapView:self.mapView viewForAnnotation:self.editingWaypoint];
         
         [self.mapView removeAnnotation:self.editingWaypoint];
         
-        CGSize pinSize = mapPin.frame.size;
+        CGSize pinSize = self.pinView.frame.size;
         CGSize frameSize = self.mapView.frame.size;
-        CGPoint offset = mapPin.centerOffset;
+        CGPoint offset = self.pinView.centerOffset;
         
-        mapPin.frame = CGRectMake(frameSize.width / 2 - pinSize.width / 2 + offset.x, frameSize.height / 2 - pinSize.height / 2 + offset.y, pinSize.width, pinSize.height);
-        [self.mapView addSubview:mapPin];
-        
-        self.pinView = [self mapView:mapView viewForAnnotation:self.editingWaypoint];
+        self.pinView.frame = CGRectMake(frameSize.width / 2 - pinSize.width / 2 + offset.x, frameSize.height / 2 - pinSize.height / 2 + offset.y, pinSize.width, pinSize.height);
+        [self.mapView addSubview:self.pinView];
         
         self.transitioningToEditMode = NO;
     }
@@ -254,8 +259,8 @@
     if ([view.annotation isKindOfClass:[Waypoint class]]) {
         [self refreshNavBar];
     }
-    else {
-        NSLog(@"Wrong type of annotation!");
+    else if ([view.annotation isKindOfClass:[TurnAnnotation class]]) {
+        [self refreshNavBar];
     }
 }
 
@@ -294,8 +299,12 @@
 
 - (void)drawRoute {
     
-    if (self.ride.allWaypoints.count > 0) {
-        [self.mapView addAnnotations:self.ride.allWaypoints];
+    if (self.ride.turnAnnotations.count > 0) {
+        [self.mapView addAnnotations:self.ride.turnAnnotations];
+    }
+    
+    if (self.ride.waypoints.count > 0) {
+        [self.mapView addAnnotations:self.ride.waypoints];
     }
     
     if (self.ride.route.overviewPolyline) {
@@ -314,8 +323,8 @@
         rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(userDidTapDone:)];
     }
     else if (self.mapView.selectedAnnotations.count > 0) {
-        leftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(userDidTapDeleteWaypoint:)];
-        rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEditWaypoint:)];
+        leftButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(userDidTapDelete:)];
+        rightButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEdit:)];
     }
     
     [self.navigationBar.topItem setLeftBarButtonItem:leftButton animated:YES];
