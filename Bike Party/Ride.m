@@ -47,8 +47,7 @@
 
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate {
     
-    NSInteger legIndex = self.waypoints.count;
-    Waypoint *newDestination = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate leg:legIndex];
+    Waypoint *newDestination = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
     
     [self.mutableWaypoints addObject:newDestination];
     
@@ -57,10 +56,10 @@
     return newDestination;
 }
 
-- (Waypoint *)addDestinationAtIndex:(NSInteger)index withCoordinate:(CLLocationCoordinate2D)coordinate {
+- (Waypoint *)addViaPointInLeg:(NSInteger)leg withCoordinate:(CLLocationCoordinate2D)coordinate {
     
-    Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate leg:index];
-    [self.mutableWaypoints insertObject:waypoint atIndex:index];
+    Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:coordinate];
+    [self.mutableWaypoints insertObject:waypoint atIndex:leg + 1];
     
     _routeRequiresRefresh = YES;
     return waypoint;

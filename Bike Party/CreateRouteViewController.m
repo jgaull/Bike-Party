@@ -21,7 +21,7 @@
 
 @property (strong, nonatomic) UITapGestureRecognizer *tap;
 
-@property (strong, nonatomic) Waypoint *editingWaypoint;
+@property (strong, nonatomic) id<MKAnnotation> editingAnnotation;
 @property (nonatomic) NSInteger editingIndex;
 @property (nonatomic) BOOL transitioningToEditMode;
 @property (nonatomic) BOOL isEditing;
@@ -53,23 +53,32 @@
         Waypoint *tapWaypoint = [self.ride addDestinationWithCoordinate:tapCoordinate];
         
         [self.mapView addAnnotation:tapWaypoint];
-        [self beginEditingWaypoint:tapWaypoint];
+        [self beginEditingAnnotation:tapWaypoint];
     }
 }
 
 #pragma mark - Button Callbacks
+- (void)userDidTapEdit:(UIBarButtonItem *)button {
+    id <MKAnnotation> annotation = self.mapView.selectedAnnotations.firstObject;
+    [self beginEditingAnnotation:annotation];
+}
+
 - (void)userDidTapDone:(UIBarButtonItem *)button {
     
     NSLog(@"confirm edits");
     
-    if (self.editingWaypoint.type == WaypointTypeViaPoint) {
-        [self.ride addDestinationAtIndex:self.editingWaypoint.leg + 1 withCoordinate:self.mapView.centerCoordinate];
+    if ([self.editingAnnotation isKindOfClass:[Waypoint class]]) {
+        
+        Waypoint *waypoint = (Waypoint *)self.editingAnnotation;
+        [self.ride updateDestination:waypoint toCoordinate:self.mapView.centerCoordinate];
     }
-    else {
-        [self.ride updateDestination:self.editingWaypoint toCoordinate:self.mapView.centerCoordinate];
+    else if ([self.editingAnnotation isKindOfClass:[TurnAnnotation class]]) {
+        
+        TurnAnnotation *turnAnnotation = (TurnAnnotation *)self.editingAnnotation;
+        [self.ride addViaPointInLeg:turnAnnotation.leg withCoordinate:self.mapView.centerCoordinate];
     }
     
-    [self.mapView addAnnotation:self.editingWaypoint];
+    [self.mapView addAnnotation:self.editingAnnotation];
     [self endEditing];
     
     [self refreshNavBar];
@@ -78,8 +87,8 @@
 
 - (void)userDidTapCancel:(UIBarButtonItem *)button {
     
-    [self.mapView addAnnotation:self.editingWaypoint];
-    [self.mapView setCenterCoordinate:self.editingWaypoint.coordinate animated:YES];
+    [self.mapView addAnnotation:self.editingAnnotation];
+    [self.mapView setCenterCoordinate:self.editingAnnotation.coordinate animated:YES];
     [self endEditing];
     
     [self refreshNavBar];
@@ -107,35 +116,17 @@
     [self showViewController:alert sender:self];
 }
 
-- (void)userDidTapEdit:(UIBarButtonItem *)button {
-    NSLog(@"Edit");
-    
-    Waypoint *waypoint;
-    
-    id <MKAnnotation> annotation = self.mapView.selectedAnnotations.firstObject;
-    if ([annotation isKindOfClass:[Waypoint class]]) {
-        
-        waypoint = (Waypoint *)annotation;
-    }
-    else if ([annotation isKindOfClass:[TurnAnnotation class]]) {
-        
-        waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:annotation.coordinate];
-    }
-    
-    [self beginEditingWaypoint:waypoint];
-}
-
-- (void)beginEditingWaypoint:(Waypoint *)waypoint {
+- (void)beginEditingAnnotation:(id<MKAnnotation>)annotation {
     
     //When the pin and map are centered we use this
-    self.editingWaypoint = waypoint;
+    self.editingAnnotation = annotation;
     self.transitioningToEditMode = YES;
     self.isEditing = YES;
     self.tap.enabled = NO;
     
     self.mapView.lockCenterWhileZooming = YES;
     
-    CLLocationCoordinate2D coordinate = waypoint.coordinate;
+    CLLocationCoordinate2D coordinate = annotation.coordinate;
     MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coordinate, 0.005131, 0.004123);
     [self.mapView setRegion:region animated:YES];
     
@@ -144,9 +135,9 @@
 
 - (void)endEditing {
     
-    [self.mapView deselectAnnotation:self.editingWaypoint animated:YES];
+    [self.mapView deselectAnnotation:self.editingAnnotation animated:YES];
     
-    self.editingWaypoint = nil;
+    self.editingAnnotation = nil;
     self.isEditing = NO;
     self.tap.enabled = YES;
     
@@ -226,9 +217,9 @@
         //It might be worth using this unless it's nil.
         //MKAnnotationView *mapPin = [self.mapView viewForAnnotation:self.editingWaypoint];
         
-        self.pinView = [self mapView:self.mapView viewForAnnotation:self.editingWaypoint];
+        self.pinView = [self mapView:self.mapView viewForAnnotation:self.editingAnnotation];
         
-        [self.mapView removeAnnotation:self.editingWaypoint];
+        [self.mapView removeAnnotation:self.editingAnnotation];
         
         CGSize pinSize = self.pinView.frame.size;
         CGSize frameSize = self.mapView.frame.size;
