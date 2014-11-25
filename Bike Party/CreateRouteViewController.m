@@ -19,7 +19,7 @@
 @property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
 @property (weak, nonatomic) IBOutlet CenterLockingMapView *mapView;
 
-@property (strong, nonatomic) UITapGestureRecognizer *tap;
+@property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
 
 @property (strong, nonatomic) id<MKAnnotation> editingAnnotation;
 @property (nonatomic) NSInteger editingIndex;
@@ -39,9 +39,9 @@
     self.ride = [Ride new];
     //[self performSelector:@selector(testicle) withObject:nil afterDelay:5];
     
-    self.tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    self.tap.delegate = self;
-    [self.mapView addGestureRecognizer:self.tap];
+    self.longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
+    //self.tap.delegate = self;
+    [self.mapView addGestureRecognizer:self.longPress];
 }
 
 #pragma mark - Gesture Recognizer Handlers
@@ -54,6 +54,18 @@
         
         [self.mapView addAnnotation:tapWaypoint];
         [self beginEditingAnnotation:tapWaypoint];
+    }
+}
+
+- (void)handleLongPress:(UILongPressGestureRecognizer *)longPress {
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        
+        CGPoint longPressPoint = [longPress locationInView:self.mapView];
+        CLLocationCoordinate2D longPressCoordinate = [self.mapView convertPoint:longPressPoint toCoordinateFromView:self.mapView];
+        Waypoint *longPressWaypoint = [self.ride addDestinationWithCoordinate:longPressCoordinate];
+        
+        [self.mapView addAnnotation:longPressWaypoint];
+        [self beginEditingAnnotation:longPressWaypoint];
     }
 }
 
@@ -122,7 +134,7 @@
     self.editingAnnotation = annotation;
     self.transitioningToEditMode = YES;
     self.isEditing = YES;
-    self.tap.enabled = NO;
+    self.longPress.enabled = NO;
     
     self.mapView.lockCenterWhileZooming = YES;
     
@@ -139,7 +151,7 @@
     
     self.editingAnnotation = nil;
     self.isEditing = NO;
-    self.tap.enabled = YES;
+    self.longPress.enabled = YES;
     
     self.mapView.lockCenterWhileZooming = NO;
     
