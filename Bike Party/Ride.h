@@ -14,7 +14,7 @@
 @interface Ride : NSObject
 
 @property (readonly, nonatomic) GoogleDirectionsRoute *route;
-@property (readonly, nonatomic) NSArray *waypoints;
+@property (readonly, nonatomic) NSArray *destinations;
 @property (readonly, nonatomic) NSArray *allWaypoints;
 @property (nonatomic, readonly) BOOL routeRequiresRefresh;
 
@@ -22,6 +22,7 @@
 - (void)removeDestination:(Waypoint *)destination;
 - (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination;
 - (void)updateDestination:(Waypoint *)waypoint toCoordinate:(CLLocationCoordinate2D)coordinate;
+- (Waypoint *)addDestinationAtIndex:(NSInteger)index withCoordinate:(CLLocationCoordinate2D)coordinate;
 
 - (void)loadDirectionsWithCallback:(void (^)(GoogleDirectionsRoute *route, NSError *error))callback;
 

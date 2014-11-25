@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "EditRouteMapViewController.h"
+#import "CenterLockingMapView.h"
 
 @interface CreateRouteViewController : UIViewController <MKMapViewDelegate, UIGestureRecognizerDelegate>
 

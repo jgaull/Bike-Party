@@ -23,8 +23,11 @@ typedef enum {
 @property (nonatomic, readonly, copy) NSString *subtitle;
 
 @property (nonatomic, readonly) WaypointType type;
+@property (nonatomic, readonly) NSInteger leg;
 
+- (id)initWithWaypoint:(Waypoint *)waypoint;
 - (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate;
 - (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate title:(NSString *)name;
+- (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate leg:(NSInteger)leg;
 
 @end

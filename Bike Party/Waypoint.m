@@ -10,12 +10,33 @@
 
 @implementation Waypoint
 
+- (id)initWithWaypoint:(Waypoint *)waypoint {
+    self = [super init];
+    if (self) {
+        _coordinate = waypoint.coordinate;
+        _type = waypoint.type;
+        _leg = waypoint.leg;
+        _title = waypoint.title;
+    }
+    return self;
+}
+
 - (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate {
     
-    self = [super self];
+    self = [super init];
     if (self) {
         _coordinate = coordinate;
         _type = type;
+    }
+    return self;
+}
+
+- (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate leg:(NSInteger)leg {
+    self = [super init];
+    if (self) {
+        _type = type;
+        _coordinate = coordinate;
+        _leg = leg;
     }
     return self;
 }
@@ -39,7 +60,8 @@
             otherWaypoint.coordinate.longitude == self.coordinate.longitude &&
             [otherWaypoint.title isEqualToString:self.title] &&
             [otherWaypoint.subtitle isEqualToString:self.subtitle] &&
-            otherWaypoint.type == self.type) {
+            otherWaypoint.type == self.type &&
+            otherWaypoint.leg == self.leg) {
             
             return YES;
         }

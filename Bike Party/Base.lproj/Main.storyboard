@@ -33,7 +33,7 @@
                                 </constraints>
                                 <items/>
                             </toolbar>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="bj2-EP-tQV" customClass="EditRouteMapViewController">
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="bj2-EP-tQV" customClass="CenterLockingMapView">
                                 <rect key="frame" x="0.0" y="64" width="600" height="492"/>
                                 <connections>
                                     <outlet property="delegate" destination="vXZ-lx-hvc" id="ddp-uc-4cH"/>

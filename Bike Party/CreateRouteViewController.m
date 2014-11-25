@@ -16,7 +16,7 @@
 
 @property (weak, nonatomic) IBOutlet UINavigationBar *navigationBar;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
-@property (weak, nonatomic) IBOutlet EditRouteMapViewController *mapView;
+@property (weak, nonatomic) IBOutlet CenterLockingMapView *mapView;
 
 @property (strong, nonatomic) UITapGestureRecognizer *tap;
 
@@ -43,25 +43,81 @@
     [self.mapView addGestureRecognizer:self.tap];
 }
 
-/*
-- (void)insertWaypoint:(Waypoint *)waypoint atIndex:(NSUInteger)index {
-    [self.mutableWaypoints insertObject:waypoint atIndex:index];
-    [self.mapView addAnnotation:waypoint];
+#pragma mark - Gesture Recognizer Handlers
+- (void)handleTap:(UITapGestureRecognizer *)tap {
+    if (tap.state == UIGestureRecognizerStateEnded && self.mapView.selectedAnnotations.count == 0) {
+        
+        CGPoint tapPoint = [tap locationInView:self.mapView];
+        CLLocationCoordinate2D tapCoordinate = [self.mapView convertPoint:tapPoint toCoordinateFromView:self.mapView];
+        Waypoint *tapWaypoint = [self.ride addDestinationWithCoordinate:tapCoordinate];
+        
+        [self.mapView addAnnotation:tapWaypoint];
+        [self beginEditingWaypoint:tapWaypoint];
+    }
 }
- */
 
-- (void)confirmEdits {
+#pragma mark - Button Callbacks
+- (void)userDidTapDone:(UIBarButtonItem *)button {
     
-    [self.ride updateDestination:self.editingWaypoint toCoordinate:self.mapView.centerCoordinate];
+    NSLog(@"confirm edits");
+    
+    if (self.editingWaypoint.type == WaypointTypeTurn) {
+        [self.ride addDestinationAtIndex:self.editingWaypoint.leg + 1 withCoordinate:self.mapView.centerCoordinate];
+    }
+    else {
+        [self.ride updateDestination:self.editingWaypoint toCoordinate:self.mapView.centerCoordinate];
+    }
+    
     [self.mapView addAnnotation:self.editingWaypoint];
     [self endEditing];
+    
+    [self refreshNavBar];
+    [self refreshRoute];
 }
 
-- (void)cancelEdits {
+- (void)userDidTapCancel:(UIBarButtonItem *)button {
     
     [self.mapView addAnnotation:self.editingWaypoint];
     [self.mapView setCenterCoordinate:self.editingWaypoint.coordinate animated:YES];
     [self endEditing];
+    
+    [self refreshNavBar];
+    [self refreshRoute];
+}
+
+- (void)userDidTapDeleteWaypoint:(UIBarButtonItem *)button {
+    NSLog(@"delete");
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete?" message:@"Are you sure you would like to delete this waypoint?" preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *confirm = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        
+        Waypoint *selectedWaypoint = self.mapView.selectedAnnotations.firstObject;
+        [self.ride removeDestination:selectedWaypoint];
+        
+        [self endEditing];
+        [self refreshRoute];
+    }];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+    
+    [alert addAction:confirm];
+    [alert addAction:cancel];
+    [self showViewController:alert sender:self];
+}
+
+- (void)userDidTapEditWaypoint:(UIBarButtonItem *)button {
+    NSLog(@"Edit");
+    
+    Waypoint *waypoint = self.mapView.selectedAnnotations.firstObject;
+    if (waypoint.type == WaypointTypeDestination) {
+        
+        [self beginEditingWaypoint:waypoint];
+    }
+    else if (waypoint.type == WaypointTypeTurn) {
+        
+        [self beginEditingWaypoint:waypoint];
+    }
 }
 
 - (void)beginEditingWaypoint:(Waypoint *)waypoint {
@@ -95,181 +151,6 @@
     self.pinView = nil;
     
     [self refreshNavBar];
-}
-
-- (void)handleTap:(UITapGestureRecognizer *)tap {
-    if (tap.state == UIGestureRecognizerStateEnded && self.mapView.selectedAnnotations.count == 0) {
-        
-        CGPoint tapPoint = [tap locationInView:self.mapView];
-        CLLocationCoordinate2D tapCoordinate = [self.mapView convertPoint:tapPoint toCoordinateFromView:self.mapView];
-        Waypoint *tapWaypoint = [self.ride addDestinationWithCoordinate:tapCoordinate];
-        
-        [self.mapView addAnnotation:tapWaypoint];
-        [self beginEditingWaypoint:tapWaypoint];
-    }
-}
-
-/*
-- (void)testicle {
-    CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(37.7833, 122.4167);
-    Waypoint *waypoint = [[Waypoint alloc] initWithCoordinate:coordinate andName:@"Testicle"];
-    [self.editRouteMap addWaypoint:waypoint];
-}
- */
-
-/*
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    if ([segue.destinationViewController isKindOfClass:[EditRouteMapViewController class]]) {
-        EditRouteMapViewController *editRouteMap = (EditRouteMapViewController *)segue.destinationViewController;
-        editRouteMap.delegate = self;
-        self.map = editRouteMap;
-    }
-}
- */
-
-/*
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didBeginEditingWaypoint:(Waypoint *)waypoint {
-    NSLog(@"Begin editing!");
-    
-    self.editingIndex = [self.ride.waypoints indexOfObject:waypoint];
-    [self refreshNavBar];
-}
-
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didUpdateEditingWaypoint:(Waypoint *)waypoint {
-    
-    Waypoint *editingWaypoint = [self.ride.waypoints objectAtIndex:self.editingIndex];
-    editingWaypoint.coordinate = waypoint.coordinate;
-    
-    //[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(refreshRoute) object:nil];
-    //[self performSelector:@selector(refreshRoute) withObject:nil afterDelay:1];
-    
-}
- */
-
-/*
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectPolyline:(id<NSCopying>)polylineIdentifier atCoordinate:(CLLocationCoordinate2D)coordinate {
-    NSLog(@"selected polyline: %@", polylineIdentifier);
-    
-    NSNumber *identifier = (NSNumber *)polylineIdentifier;
-    NSInteger index = identifier.integerValue + 1;
-    
-    Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:coordinate];
-    [self.map insertWaypoint:waypoint atIndex:index];
-    [self.map beginEditingWaypoint:waypoint];
-}
- */
-
-/*
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectCoordinate:(CLLocationCoordinate2D)coordinate {
-    
-    Waypoint *waypoint = [self.ride addDestinationWithCoordinate:coordinate];
-    [self.map addWaypoint:waypoint];
-    [self.map beginEditingWaypoint:waypoint];
-}
- */
-
-/*
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didSelectWaypoint:(Waypoint *)waypoint {
-    NSLog(@"waypoint selected");
-    
-    NSMutableArray *items = [NSMutableArray new];
-    
-    if (waypoint.type == WaypointTypeDestination) {
-        UIBarButtonItem *trashButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(userDidTapDeleteWaypoint:)];
-        [items addObject:trashButton];
-    }
-    
-    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    [items addObject:flexibleSpace];
-    
-    if (waypoint.type == WaypointTypeDestination) {
-        UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(userDidTapEditWaypoint:)];
-        [items addObject:editButton];
-    }
-    
-    [self.toolbar setItems:items animated:YES];
-}
-
-- (void)editRouteMap:(EditRouteMapViewController *)editRouteMap didDeselectWaypoint:(Waypoint *)waypoint {
-    NSLog(@"Waypoint deselected");
-    
-    [self.toolbar setItems:@[] animated:YES];
-}
- */
-
-- (void)userDidTapDone:(UIBarButtonItem *)button {
-    
-    NSLog(@"confirm edits");
-    
-    [self confirmEdits];
-    [self refreshNavBar];
-    [self refreshRoute];
-}
-
-- (void)userDidTapCancel:(UIBarButtonItem *)button {
-    
-    //[self.ride removeDestination:self.selectedWaypoint];
-    
-    [self cancelEdits];
-    [self refreshNavBar];
-    [self refreshRoute];
-}
-
-- (void)userDidTapDeleteWaypoint:(UIBarButtonItem *)button {
-    NSLog(@"delete");
-    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete?" message:@"Are you sure you would like to delete this waypoint?" preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction *confirm = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
-        
-        Waypoint *selectedWaypoint = self.mapView.selectedAnnotations.firstObject;
-        [self.ride removeDestination:selectedWaypoint];
-        
-        [self endEditing];
-        [self refreshRoute];
-    }];
-    
-    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
-    
-    [alert addAction:confirm];
-    [alert addAction:cancel];
-    [self showViewController:alert sender:self];
-}
-
-- (void)userDidTapEditWaypoint:(UIBarButtonItem *)button {
-    NSLog(@"Edit");
-    
-    Waypoint *waypoint = self.mapView.selectedAnnotations.firstObject;
-    if (waypoint.type == WaypointTypeDestination) {
-        [self beginEditingWaypoint:waypoint];
-    }
-    else if (waypoint.type == WaypointTypeTurn) {
-        
-        /*
-        NSInteger totalSteps = 0;
-        for (GoogleDirectionsLeg *leg in self.route.legs) {
-            for (GoogleDirectionsStep *step in leg.steps) {
-                
-                totalSteps += leg.steps.count;
-                BOOL foundWaypoint = NO;
-                CLLocationCoordinate2D stepCoordinate = step.startLocation.coordinate;
-                CLLocationCoordinate2D waypointCoordinate = waypoint.coordinate;
-                if (stepCoordinate.latitude == waypointCoordinate.latitude && stepCoordinate.longitude == waypointCoordinate.longitude) {
-                    foundWaypoint = YES;
-                    break;
-                }
-                
-                if (foundWaypoint) {
-                    break;
-                }
-            }
-        }
-        
-        Waypoint *newWaypoint = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:waypoint.coordinate];
-        [self.map insertWaypoint:newWaypoint atIndex:totalSteps];
-        [self.map beginEditingWaypoint:newWaypoint];
-         */
-    }
 }
 
 #pragma mark - UIGestureRecognizerDelegate Methods
@@ -383,6 +264,7 @@
     [self refreshNavBar];
 }
 
+#pragma mark - UI Helpers
 - (void)refreshRoute {
     
     [self clearRoute];
@@ -439,7 +321,5 @@
     [self.navigationBar.topItem setLeftBarButtonItem:leftButton animated:YES];
     [self.navigationBar.topItem setRightBarButtonItem:rightButton animated:YES];
 }
-
-#pragma mark - Getters and Setters
 
 @end
