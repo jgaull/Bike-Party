@@ -17,12 +17,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eFi-zx-gpP">
-                                <rect key="frame" x="0.0" y="64" width="600" height="492"/>
-                                <connections>
-                                    <segue destination="E2C-1W-gA2" kind="embed" id="Jz7-Ff-yHC"/>
-                                </connections>
-                            </containerView>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3i9-Pc-vFm">
                                 <rect key="frame" x="0.0" y="20" width="600" height="44"/>
                                 <constraints>
@@ -39,28 +33,29 @@
                                 </constraints>
                                 <items/>
                             </toolbar>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="bj2-EP-tQV" customClass="CenterLockingMapView">
+                                <rect key="frame" x="0.0" y="64" width="600" height="492"/>
+                                <connections>
+                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="ddp-uc-4cH"/>
+                                </connections>
+                            </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="eFi-zx-gpP" firstAttribute="top" secondItem="3i9-Pc-vFm" secondAttribute="bottom" id="18X-j0-yTj"/>
-                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="eFi-zx-gpP" secondAttribute="bottom" id="4sw-hd-rb2"/>
+                            <constraint firstItem="P5L-Tn-L0B" firstAttribute="top" secondItem="bj2-EP-tQV" secondAttribute="bottom" id="3Uh-Rv-Exx"/>
+                            <constraint firstItem="bj2-EP-tQV" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="5SL-XA-yh0"/>
                             <constraint firstItem="P5L-Tn-L0B" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="AoG-bh-La7"/>
-                            <constraint firstItem="P5L-Tn-L0B" firstAttribute="top" secondItem="eFi-zx-gpP" secondAttribute="bottom" id="EAI-dA-rSv"/>
                             <constraint firstAttribute="trailingMargin" secondItem="P5L-Tn-L0B" secondAttribute="trailing" constant="-16" id="Iok-wc-ZUI"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="eFi-zx-gpP" secondAttribute="trailing" constant="-16" id="Pj0-8j-Wot"/>
+                            <constraint firstItem="bj2-EP-tQV" firstAttribute="top" secondItem="3i9-Pc-vFm" secondAttribute="bottom" id="YWD-y7-9Nw"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="bj2-EP-tQV" secondAttribute="trailing" constant="-16" id="fVj-cE-2S1"/>
                             <constraint firstAttribute="trailingMargin" secondItem="3i9-Pc-vFm" secondAttribute="trailing" constant="-16" id="lSD-i8-gp1"/>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="P5L-Tn-L0B" secondAttribute="bottom" id="wk4-qr-HZ1"/>
                             <constraint firstItem="3i9-Pc-vFm" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="xCs-N3-UYi"/>
                             <constraint firstItem="3i9-Pc-vFm" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="yWG-fz-4eJ"/>
-                            <constraint firstItem="eFi-zx-gpP" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="z1i-IW-W9P"/>
                         </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="4sw-hd-rb2"/>
-                            </mask>
-                        </variation>
                     </view>
                     <connections>
+                        <outlet property="mapView" destination="bj2-EP-tQV" id="iql-AP-gOf"/>
                         <outlet property="navigationBar" destination="3i9-Pc-vFm" id="hWR-yC-k5G"/>
                         <outlet property="toolbar" destination="P5L-Tn-L0B" id="i8C-pe-qSv"/>
                     </connections>
@@ -95,42 +90,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VQY-Cq-3Wt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1362" y="228"/>
-        </scene>
-        <!--Edit Route Map View Controller-->
-        <scene sceneID="QNj-ok-naZ">
-            <objects>
-                <viewController automaticallyAdjustsScrollViewInsets="NO" id="E2C-1W-gA2" customClass="EditRouteMapViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="TKd-nZ-dFR"/>
-                        <viewControllerLayoutGuide type="bottom" id="IwK-ZX-7ad"/>
-                    </layoutGuides>
-                    <view key="view" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="AL4-hy-I9w">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="492"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" rotateEnabled="NO" pitchEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n3T-Ja-3Gw">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="492"/>
-                                <connections>
-                                    <outlet property="delegate" destination="E2C-1W-gA2" id="uvH-Sc-0fC"/>
-                                </connections>
-                            </mapView>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstAttribute="trailingMargin" secondItem="n3T-Ja-3Gw" secondAttribute="trailing" constant="-16" id="Dv9-sq-K4i"/>
-                            <constraint firstItem="IwK-ZX-7ad" firstAttribute="top" secondItem="n3T-Ja-3Gw" secondAttribute="bottom" id="KXh-Sq-atx"/>
-                            <constraint firstItem="n3T-Ja-3Gw" firstAttribute="top" secondItem="TKd-nZ-dFR" secondAttribute="bottom" id="k1K-8v-5Kx"/>
-                            <constraint firstItem="n3T-Ja-3Gw" firstAttribute="leading" secondItem="AL4-hy-I9w" secondAttribute="leadingMargin" constant="-16" id="kIq-vn-ct5"/>
-                        </constraints>
-                    </view>
-                    <toolbarItems/>
-                    <connections>
-                        <outlet property="mapView" destination="n3T-Ja-3Gw" id="N7c-vj-qoz"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="SRK-kf-lqc" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="636" y="-399"/>
         </scene>
     </scenes>
 </document>

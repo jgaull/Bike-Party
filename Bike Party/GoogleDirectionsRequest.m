@@ -26,7 +26,7 @@
 }
 
 - (void)loadDirectionsForPath:(NSArray *)path WithCallback:(void (^)(NSArray *routes, NSError *error))callback {
-    if (self.apiKey && path.count > 1 && path.count <= 8) {
+    if (self.apiKey && path.count > 1 && path.count <= 10) {
         
         NSString *baseUrl = @"https://maps.googleapis.com/maps/api/directions/json?key=%@&origin=%f,%f&destination=%f,%f&mode=bicycling";
         
@@ -61,6 +61,7 @@
     else {
         NSLog(@"something isn't set");
         NSLog(@"path.count: %lu", (unsigned long)path.count);
+        callback(nil, [NSError errorWithDomain:@"error" code:1 userInfo:nil]);
     }
 }
 

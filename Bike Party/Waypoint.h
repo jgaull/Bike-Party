@@ -12,7 +12,6 @@
 
 typedef enum {
     WaypointTypeDestination,
-    WaypointTypeTurn,
     WaypointTypeViaPoint
 } WaypointType;
 
@@ -24,6 +23,7 @@ typedef enum {
 
 @property (nonatomic, readonly) WaypointType type;
 
+- (id)initWithWaypoint:(Waypoint *)waypoint;
 - (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate;
 - (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate title:(NSString *)name;
 

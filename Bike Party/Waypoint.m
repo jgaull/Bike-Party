@@ -10,9 +10,19 @@
 
 @implementation Waypoint
 
+- (id)initWithWaypoint:(Waypoint *)waypoint {
+    self = [super init];
+    if (self) {
+        _coordinate = waypoint.coordinate;
+        _type = waypoint.type;
+        _title = waypoint.title;
+    }
+    return self;
+}
+
 - (id)initWithType:(WaypointType)type coordinate:(CLLocationCoordinate2D)coordinate {
     
-    self = [super self];
+    self = [super init];
     if (self) {
         _coordinate = coordinate;
         _type = type;
