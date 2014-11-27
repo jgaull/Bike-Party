@@ -176,20 +176,23 @@
     MKAnnotationView *annotationView = [self.mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
     
     if (!annotationView) {
+        
+        UIImage *image;
+        CGPoint centerOffset;
         if ([annotation isKindOfClass:[Waypoint class]]) {
             
-            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: identifier];
-            UIImage *image = [UIImage imageNamed:@"destinationMarker.png"];
-            annotationView.image = image;
-            annotationView.centerOffset = CGPointMake(0, -image.size.height / 2);
+            image = [UIImage imageNamed:@"destinationMarker.png"];
+            centerOffset = CGPointMake(0, -image.size.height / 2);
         }
         else if ([annotation isKindOfClass:[TurnAnnotation class]]) {
             
-            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:identifier];
-            UIImage *image = [UIImage imageNamed:@"turnMarker.png"];
-            annotationView.image = image;
-            annotationView.centerOffset = CGPointZero;
+            image = [UIImage imageNamed:@"turnMarker.png"];
+            centerOffset = CGPointZero;
         }
+        
+        annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: identifier];
+        annotationView.image = image;
+        annotationView.centerOffset = centerOffset;
     }
     
     return annotationView;
