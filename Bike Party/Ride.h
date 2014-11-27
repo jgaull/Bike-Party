@@ -15,9 +15,10 @@
 
 @property (readonly ,nonatomic) NSArray *turnAnnotations;
 @property (readonly, nonatomic) MKPolyline *overviewPolyline;
+@property (readonly, nonatomic) NSArray *waypoints;
 
 //- (id)initWithRoute:(GoogleDirectionsRoute *)route;
-- (id)initWithRoutes:(NSArray *)routes;
+- (id)initWithRoutes:(NSArray *)routes andWaypoints:(NSArray *)waypoints;
 
 /*
 - (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate;

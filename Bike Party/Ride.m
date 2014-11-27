@@ -29,11 +29,12 @@
 }
  */
 
-- (id)initWithRoutes:(NSArray *)routes {
+- (id)initWithRoutes:(NSArray *)routes andWaypoints:(NSArray *)waypoints {
     self = [super init];
     if (self) {
         //need to parse some stuff!
-        self.routes = routes;
+        self.routes = [NSArray arrayWithArray:routes];
+        _waypoints = [NSArray arrayWithArray:waypoints];
     }
     return self;
 }

@@ -30,7 +30,6 @@
 
 @property (strong, nonatomic) Ride *ride;
 @property (strong, nonatomic) NSMutableArray *waypoints;
-@property (nonatomic) BOOL routeRequiresRefresh;
 
 @end
 
@@ -276,7 +275,7 @@
 
 - (void)refreshRoute {
     
-    if (self.routeRequiresRefresh) {
+    if (![self.waypoints isEqualToArray:self.ride.waypoints]) {
         
         [self clearRoute];
         
@@ -284,8 +283,7 @@
         [routeLoader loadDirectionsForWaypoints:self.waypoints withCallback:^(NSArray *routes, NSError *error) {
             
             if (!error) {
-                self.ride = [[Ride alloc] initWithRoutes:routes];
-                self.routeRequiresRefresh = NO;
+                self.ride = [[Ride alloc] initWithRoutes:routes andWaypoints:self.waypoints];
             }
             else {
                 NSLog(@"error loading directions.");
@@ -345,9 +343,6 @@
     Waypoint *newDestination = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
     
     [self.waypoints addObject:newDestination];
-    
-    self.routeRequiresRefresh = YES;
-    
     return newDestination;
 }
 
@@ -355,20 +350,11 @@
     
     Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:coordinate];
     [self.waypoints insertObject:waypoint atIndex:leg + 1];
-    
-    self.routeRequiresRefresh = YES;
     return waypoint;
 }
 
 - (void)removeDestination:(Waypoint *)destination {
     [self.waypoints removeObject:destination];
-    self.routeRequiresRefresh = YES;
-}
-
-- (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination {
-    
-    [self.waypoints replaceObjectAtIndex:index withObject:destination];
-    self.routeRequiresRefresh = YES;
 }
 
 - (void)updateDestination:(Waypoint *)waypoint toCoordinate:(CLLocationCoordinate2D)coordinate {
@@ -377,8 +363,6 @@
         NSInteger index = [self.waypoints indexOfObject:waypoint];
         Waypoint *newDestionation = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
         [self.waypoints replaceObjectAtIndex:index withObject:newDestionation];
-        
-        self.routeRequiresRefresh = YES;
     }
     else {
         NSLog(@"Not in the array!");
