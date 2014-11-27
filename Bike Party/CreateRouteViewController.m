@@ -28,6 +28,9 @@
 @property (strong, nonatomic) MKAnnotationView *pinView;
 
 @property (strong, nonatomic) Ride *ride;
+@property (strong, nonatomic) NSMutableArray *loadedDirections;
+@property (strong, nonatomic) NSMutableArray *waypoints;
+@property (nonatomic) BOOL routeRequiresRefresh;
 
 @end
 
@@ -35,9 +38,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    self.ride = [Ride new];
-    //[self performSelector:@selector(testicle) withObject:nil afterDelay:5];
     
     self.longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     //self.tap.delegate = self;
@@ -50,7 +50,7 @@
         
         CGPoint tapPoint = [tap locationInView:self.mapView];
         CLLocationCoordinate2D tapCoordinate = [self.mapView convertPoint:tapPoint toCoordinateFromView:self.mapView];
-        Waypoint *tapWaypoint = [self.ride addDestinationWithCoordinate:tapCoordinate];
+        Waypoint *tapWaypoint = [self addDestinationWithCoordinate:tapCoordinate];
         
         [self.mapView addAnnotation:tapWaypoint];
         [self beginEditingAnnotation:tapWaypoint];
@@ -62,7 +62,7 @@
         
         CGPoint longPressPoint = [longPress locationInView:self.mapView];
         CLLocationCoordinate2D longPressCoordinate = [self.mapView convertPoint:longPressPoint toCoordinateFromView:self.mapView];
-        Waypoint *longPressWaypoint = [self.ride addDestinationWithCoordinate:longPressCoordinate];
+        Waypoint *longPressWaypoint = [self addDestinationWithCoordinate:longPressCoordinate];
         
         [self.mapView addAnnotation:longPressWaypoint];
         [self beginEditingAnnotation:longPressWaypoint];
@@ -82,12 +82,12 @@
     if ([self.editingAnnotation isKindOfClass:[Waypoint class]]) {
         
         Waypoint *waypoint = (Waypoint *)self.editingAnnotation;
-        [self.ride updateDestination:waypoint toCoordinate:self.mapView.centerCoordinate];
+        [self updateDestination:waypoint toCoordinate:self.mapView.centerCoordinate];
     }
     else if ([self.editingAnnotation isKindOfClass:[TurnAnnotation class]]) {
         
         TurnAnnotation *turnAnnotation = (TurnAnnotation *)self.editingAnnotation;
-        [self.ride addViaPointInLeg:turnAnnotation.leg withCoordinate:self.mapView.centerCoordinate];
+        [self addViaPointInLeg:turnAnnotation.leg withCoordinate:self.mapView.centerCoordinate];
     }
     
     [self.mapView addAnnotation:self.editingAnnotation];
@@ -115,7 +115,7 @@
     UIAlertAction *confirm = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
         
         Waypoint *selectedWaypoint = self.mapView.selectedAnnotations.firstObject;
-        [self.ride removeDestination:selectedWaypoint];
+        [self removeDestination:selectedWaypoint];
         
         [self endEditing];
         [self refreshRoute];
@@ -273,23 +273,73 @@
 }
 
 #pragma mark - UI Helpers
+
 - (void)refreshRoute {
     
-    [self clearRoute];
-    
-    [self.ride loadDirectionsWithCallback:^(GoogleDirectionsRoute *route, NSError *error) {
-        if (!error) {
+    if (self.routeRequiresRefresh) {
+        
+        [self clearRoute];
+        
+        NSMutableArray *path = [NSMutableArray new];
+        for (Waypoint *waypoint in self.waypoints) {
+            CLLocation *location = [[CLLocation alloc] initWithLatitude:waypoint.coordinate.latitude longitude:waypoint.coordinate.longitude];
+            [path addObject:location];
+        }
+        
+        NSMutableArray *paths = [NSMutableArray new];
+        
+        int i = 0;
+        while (i < path.count) {
             
-            //If this is called on a background thread the app crashes.
-            //[self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
+            NSInteger length = MIN(path.count - i, 10);
+            
+            if (path.count - i - length == 1) {
+                length--;
+            }
+            
+            NSRange range = NSMakeRange(i, length);
+            NSArray *pathSubsection = [path subarrayWithRange:range];
+            [paths addObject:pathSubsection];
+            
+            i += length;
+        }
+        
+        for (int i = 0; i < paths.count; i++) {
+            NSArray *subPath = [paths objectAtIndex:i];
+            NSLog(@"subPath.count = %lu", (unsigned long)subPath.count);
+            [self performSelector:@selector(loadDirectionsForPath:) withObject:subPath afterDelay:i * 0.5];
+        }
+    }
+    
+}
+
+- (void)loadDirectionsForPath:(NSArray *)path {
+    
+    GoogleDirectionsRequest *directions = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
+    [directions loadDirectionsForPath:path WithCallback:^(NSArray *routes, NSError *error) {
+        if (!error) {
+            //_route = routes.firstObject;
+            
+            GoogleDirectionsRoute *newRoute = routes.firstObject;
+            [self.loadedDirections addObject:newRoute];
+            
+            NSInteger loadedWaypoints = 0;
+            for (GoogleDirectionsRoute *route in self.loadedDirections) {
+                loadedWaypoints += route.legs.count + 1;
+            }
+            
+            if (loadedWaypoints >= self.waypoints.count) {
+                self.ride = [[Ride alloc] initWithRoutes:self.loadedDirections];
+                self.loadedDirections = nil;
+                self.routeRequiresRefresh = NO;
+            }
         }
         else {
-            NSLog(@"Error loading route.");
+            NSLog(@"error loading directions.");
         }
         
         [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
     }];
-    
 }
 
 - (void)clearRoute {
@@ -306,12 +356,12 @@
         [self.mapView addAnnotations:self.ride.turnAnnotations];
     }
     
-    if (self.ride.waypoints.count > 0) {
-        [self.mapView addAnnotations:self.ride.waypoints];
+    if (self.waypoints.count > 0) {
+        [self.mapView addAnnotations:self.waypoints];
     }
     
-    if (self.ride.route.overviewPolyline) {
-        [self.mapView addOverlay:self.ride.route.overviewPolyline];
+    if (self.ride.overviewPolyline) {
+        [self.mapView addOverlay:self.ride.overviewPolyline];
     }
 }
 
@@ -332,6 +382,67 @@
     
     [self.navigationBar.topItem setLeftBarButtonItem:leftButton animated:YES];
     [self.navigationBar.topItem setRightBarButtonItem:rightButton animated:YES];
+}
+
+#pragma mark - Route Helper Methods
+- (Waypoint *)addDestinationWithCoordinate:(CLLocationCoordinate2D)coordinate {
+    
+    Waypoint *newDestination = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
+    
+    [self.waypoints addObject:newDestination];
+    
+    self.routeRequiresRefresh = YES;
+    
+    return newDestination;
+}
+
+- (Waypoint *)addViaPointInLeg:(NSInteger)leg withCoordinate:(CLLocationCoordinate2D)coordinate {
+    
+    Waypoint *waypoint = [[Waypoint alloc] initWithType:WaypointTypeViaPoint coordinate:coordinate];
+    [self.waypoints insertObject:waypoint atIndex:leg + 1];
+    
+    self.routeRequiresRefresh = YES;
+    return waypoint;
+}
+
+- (void)removeDestination:(Waypoint *)destination {
+    [self.waypoints removeObject:destination];
+    self.routeRequiresRefresh = YES;
+}
+
+- (void)replaceDestinationAtIndex:(NSInteger)index withDestination:(Waypoint *)destination {
+    
+    [self.waypoints replaceObjectAtIndex:index withObject:destination];
+    self.routeRequiresRefresh = YES;
+}
+
+- (void)updateDestination:(Waypoint *)waypoint toCoordinate:(CLLocationCoordinate2D)coordinate {
+    
+    if ([self.waypoints containsObject:waypoint]) {
+        NSInteger index = [self.waypoints indexOfObject:waypoint];
+        Waypoint *newDestionation = [[Waypoint alloc] initWithType:WaypointTypeDestination coordinate:coordinate];
+        [self.waypoints replaceObjectAtIndex:index withObject:newDestionation];
+        
+        self.routeRequiresRefresh = YES;
+    }
+    else {
+        NSLog(@"Not in the array!");
+    }
+}
+
+#pragma mark - Getters and Setters
+- (NSMutableArray *)waypoints {
+    if (!_waypoints) {
+        _waypoints = [NSMutableArray new];
+    }
+    return _waypoints;
+}
+
+- (NSMutableArray *)loadedDirections {
+    if (!_loadedDirections) {
+        _loadedDirections = [NSMutableArray new];
+    }
+    return _loadedDirections;
 }
 
 @end
