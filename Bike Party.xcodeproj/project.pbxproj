@@ -12,6 +12,7 @@
 		FCA954CF1A21B26200EE80E1 /* turnMarker@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCA954CD1A21B26200EE80E1 /* turnMarker@2x.png */; };
 		FCA954D21A226C4C00EE80E1 /* Ride.m in Sources */ = {isa = PBXBuildFile; fileRef = FCA954D11A226C4C00EE80E1 /* Ride.m */; };
 		FCA954D51A226D2900EE80E1 /* RideLeg.m in Sources */ = {isa = PBXBuildFile; fileRef = FCA954D41A226D2900EE80E1 /* RideLeg.m */; };
+		FCDF3E911A27A4C000DB8529 /* RouteLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = FCDF3E901A27A4C000DB8529 /* RouteLoader.m */; };
 		FCE77AAF1A132DF000E9763D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AAE1A132DF000E9763D /* main.m */; };
 		FCE77AB21A132DF000E9763D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AB11A132DF000E9763D /* AppDelegate.m */; };
 		FCE77AB51A132DF000E9763D /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCE77AB41A132DF000E9763D /* ViewController.m */; };
@@ -74,6 +75,8 @@
 		FCA954D11A226C4C00EE80E1 /* Ride.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Ride.m; sourceTree = "<group>"; };
 		FCA954D31A226D2900EE80E1 /* RideLeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RideLeg.h; sourceTree = "<group>"; };
 		FCA954D41A226D2900EE80E1 /* RideLeg.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RideLeg.m; sourceTree = "<group>"; };
+		FCDF3E8F1A27A4C000DB8529 /* RouteLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RouteLoader.h; sourceTree = "<group>"; };
+		FCDF3E901A27A4C000DB8529 /* RouteLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RouteLoader.m; sourceTree = "<group>"; };
 		FCE77AA91A132DF000E9763D /* Bike Party.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bike Party.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCE77AAD1A132DF000E9763D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FCE77AAE1A132DF000E9763D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -257,6 +260,8 @@
 				FCA954D41A226D2900EE80E1 /* RideLeg.m */,
 				FC6CB6E81A245C6B00E06F1F /* TurnAnnotation.h */,
 				FC6CB6E91A245C6B00E06F1F /* TurnAnnotation.m */,
+				FCDF3E8F1A27A4C000DB8529 /* RouteLoader.h */,
+				FCDF3E901A27A4C000DB8529 /* RouteLoader.m */,
 			);
 			path = "Bike Party";
 			sourceTree = "<group>";
@@ -430,6 +435,7 @@
 				FCE77B2E1A18407100E9763D /* TouchGestureRecognizer.m in Sources */,
 				FCE77AF21A13FD9400E9763D /* MFLocationManager.m in Sources */,
 				FCE77B251A1755CC00E9763D /* DestinationPin.m in Sources */,
+				FCDF3E911A27A4C000DB8529 /* RouteLoader.m in Sources */,
 				FCE77B2B1A17D91000E9763D /* CenterLockingMapView.m in Sources */,
 				FCE77B101A14685500E9763D /* GoogleDirectionsStep.m in Sources */,
 				FCF57A951A1E88040083F71A /* Waypoint.m in Sources */,

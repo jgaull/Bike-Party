@@ -12,6 +12,7 @@
 #import "GoogleDirectionsStep.h"
 #import "Ride.h"
 #import "TurnAnnotation.h"
+#import "RouteLoader.h"
 
 @interface CreateRouteViewController ()
 
@@ -28,7 +29,6 @@
 @property (strong, nonatomic) MKAnnotationView *pinView;
 
 @property (strong, nonatomic) Ride *ride;
-@property (strong, nonatomic) NSMutableArray *loadedDirections;
 @property (strong, nonatomic) NSMutableArray *waypoints;
 @property (nonatomic) BOOL routeRequiresRefresh;
 
@@ -280,66 +280,21 @@
         
         [self clearRoute];
         
-        NSMutableArray *path = [NSMutableArray new];
-        for (Waypoint *waypoint in self.waypoints) {
-            CLLocation *location = [[CLLocation alloc] initWithLatitude:waypoint.coordinate.latitude longitude:waypoint.coordinate.longitude];
-            [path addObject:location];
-        }
-        
-        NSMutableArray *paths = [NSMutableArray new];
-        
-        int i = 0;
-        while (i < path.count) {
+        RouteLoader *routeLoader = [RouteLoader new];
+        [routeLoader loadDirectionsForWaypoints:self.waypoints withCallback:^(NSArray *routes, NSError *error) {
             
-            NSInteger length = MIN(path.count - i, 10);
-            
-            if (path.count - i - length == 1) {
-                length--;
-            }
-            
-            NSRange range = NSMakeRange(i, length);
-            NSArray *pathSubsection = [path subarrayWithRange:range];
-            [paths addObject:pathSubsection];
-            
-            i += length;
-        }
-        
-        for (int i = 0; i < paths.count; i++) {
-            NSArray *subPath = [paths objectAtIndex:i];
-            NSLog(@"subPath.count = %lu", (unsigned long)subPath.count);
-            [self performSelector:@selector(loadDirectionsForPath:) withObject:subPath afterDelay:i * 0.5];
-        }
-    }
-    
-}
-
-- (void)loadDirectionsForPath:(NSArray *)path {
-    
-    GoogleDirectionsRequest *directions = [[GoogleDirectionsRequest alloc] initWithAPIKey:@"AIzaSyBHeXy9Im_mAQyCqugF8_kBdKnerpQ0kjE"];
-    [directions loadDirectionsForPath:path WithCallback:^(NSArray *routes, NSError *error) {
-        if (!error) {
-            //_route = routes.firstObject;
-            
-            GoogleDirectionsRoute *newRoute = routes.firstObject;
-            [self.loadedDirections addObject:newRoute];
-            
-            NSInteger loadedWaypoints = 0;
-            for (GoogleDirectionsRoute *route in self.loadedDirections) {
-                loadedWaypoints += route.legs.count + 1;
-            }
-            
-            if (loadedWaypoints >= self.waypoints.count) {
-                self.ride = [[Ride alloc] initWithRoutes:self.loadedDirections];
-                self.loadedDirections = nil;
+            if (!error) {
+                self.ride = [[Ride alloc] initWithRoutes:routes];
                 self.routeRequiresRefresh = NO;
             }
-        }
-        else {
-            NSLog(@"error loading directions.");
-        }
-        
-        [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
-    }];
+            else {
+                NSLog(@"error loading directions.");
+            }
+            
+            [self performSelectorOnMainThread:@selector(drawRoute) withObject:nil waitUntilDone:NO];
+        }];
+    }
+    
 }
 
 - (void)clearRoute {
@@ -436,13 +391,6 @@
         _waypoints = [NSMutableArray new];
     }
     return _waypoints;
-}
-
-- (NSMutableArray *)loadedDirections {
-    if (!_loadedDirections) {
-        _loadedDirections = [NSMutableArray new];
-    }
-    return _loadedDirections;
 }
 
 @end
